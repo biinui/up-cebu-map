@@ -1,14 +1,16 @@
 package ph.edu.upcebu.upcebumap;
 
-import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+
+import ph.edu.upcebu.upcebumap.model.Landmark;
+import ph.edu.upcebu.upcebumap.util.Constant;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
@@ -22,9 +24,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-        getActionBar().show();
     }
-
 
     /**
      * Manipulates the map once available.
@@ -38,10 +38,29 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-
-        // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+        showUPCebu();
+        showBuildingMarkers();
+        showActivityAreaMarkers();
     }
+
+    private void showUPCebu() {
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(Constant.UP_CEBU_POSITION, 19f));
+    }
+
+    private void showMarker(Landmark lm) {
+        mMap.addMarker(new MarkerOptions().position(lm.getLatlng()).title(lm.getTitle()));
+    }
+
+    private void showBuildingMarkers() {
+        for (Landmark lm : Landmark.Buildings()) {
+            showMarker(lm);
+        }
+    }
+
+    private void showActivityAreaMarkers() {
+        for (Landmark lm : Landmark.ActivityAreas()) {
+            showMarker(lm);
+        }
+    }
+
 }
