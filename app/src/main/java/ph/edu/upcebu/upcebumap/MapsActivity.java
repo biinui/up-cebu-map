@@ -7,10 +7,11 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import ph.edu.upcebu.upcebumap.model.Landmark;
-import ph.edu.upcebu.upcebumap.util.Constant;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
@@ -44,7 +45,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private void showUPCebu() {
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(Constant.UP_CEBU_POSITION, 19f));
+        LatLngBounds UPCebu = new LatLngBounds(new LatLng(10.323931, 123.897503), new LatLng(10.321075, 123.900249));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(UPCebu, 0));
     }
 
     private void showMarker(Landmark lm) {
