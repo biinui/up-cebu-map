@@ -1,5 +1,6 @@
 package ph.edu.upcebu.upcebumap;
 
+import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 
@@ -7,11 +8,13 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import ph.edu.upcebu.upcebumap.model.Landmark;
+import ph.edu.upcebu.upcebumap.util.Constant;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
@@ -45,8 +48,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private void showUPCebu() {
-        LatLngBounds UPCebu = new LatLngBounds(new LatLng(10.323931, 123.897503), new LatLng(10.321075, 123.900249));
-        mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(UPCebu, 0));
+        mMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
+            @Override
+            public void onMapLoaded() {
+                CameraPosition position = new CameraPosition.Builder()
+                        .target(Constant.UP_CEBU_POSITION)
+                        .zoom(17.5f)
+                        .build();
+                mMap.moveCamera(CameraUpdateFactory.newCameraPosition(position));
+//                mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+            }
+        });
     }
 
     private void showMarker(Landmark lm) {

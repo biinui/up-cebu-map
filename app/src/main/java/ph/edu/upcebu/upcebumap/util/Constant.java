@@ -34,7 +34,7 @@ public class Constant {
     public static final String HIGH_SCHOOL_FIELD = "High School Field";
     public static final String AS_FIELD = "AS Field";
 
-    public static final LatLng UP_CEBU_POSITION = new LatLng(10.3224922, 123.8985303);
+    public static final LatLng UP_CEBU_POSITION = new LatLng(10.3225033, 123.8987402);
 
     public static final LatLng ADMINISTRATION_BUILDING_POSITION = new LatLng(10.322301, 123.898249);
     public static final LatLng HEALTH_SERVICES_POSITION = new LatLng(10.322231, 123.897925);
