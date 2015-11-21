@@ -2,20 +2,29 @@ package ph.edu.upcebu.upcebumap;
 
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.view.ActionMode;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolygonOptions;
+
+import java.util.List;
 
 import ph.edu.upcebu.upcebumap.model.Landmark;
 import ph.edu.upcebu.upcebumap.util.Constant;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
-
+public class MapsActivity extends FragmentActivity
+        implements OnMapReadyCallback, GoogleMap.OnMapLongClickListener, GoogleMap.OnMapClickListener, ActionMode.Callback {
     private GoogleMap mMap;
+    private boolean mIsActionMode = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +51,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         showUPCebu();
         showBuildingMarkers();
         showActivityAreaMarkers();
+        mMap.setOnMapLongClickListener(this);
+        mMap.setOnMapClickListener(this);
     }
 
     private void showUPCebu() {
@@ -74,8 +85,51 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
-    private void showBoundary() {
+    private void showBoundary(List<LatLng> boundaries) {
+        PolygonOptions po = new PolygonOptions().addAll(boundaries);
+        mMap.addPolygon(po);
+    }
+
+
+    @Override
+    public void onMapLongClick(LatLng latLng) {
+        if (mIsActionMode) {
+            return;
+        }
+
+        startActionMode(this);
+    }
+
+    @Override
+    public void onMapClick(LatLng latLng) {
 
     }
 
+    @Override
+    public boolean onCreateActionMode(ActionMode actionMode, Menu menu) {
+        mIsActionMode = true;
+        MenuInflater inflater = actionMode.getMenuInflater();
+        inflater.inflate(R.menu.context_menu_maps, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onPrepareActionMode(ActionMode actionMode, Menu menu) {
+        return false;
+    }
+
+    @Override
+    public boolean onActionItemClicked(ActionMode actionMode, MenuItem menuItem) {
+        switch (menuItem.getItemId()) {
+            case 0:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    @Override
+    public void onDestroyActionMode(ActionMode actionMode) {
+        mIsActionMode = false;
+    }
 }

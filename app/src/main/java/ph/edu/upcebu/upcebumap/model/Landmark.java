@@ -15,6 +15,7 @@ public class Landmark {
     private String title;
     private LatLng latlng;
     private String category;
+    private List<LatLng> boundaries;
 
     public Landmark(String title, LatLng latlng) {
         this.title = title;
@@ -51,6 +52,17 @@ public class Landmark {
                 , new Landmark(Constant.HIGH_SCHOOL_OPEN_COURT, Constant.HIGH_SCHOOL_OPEN_COURT_POSITION)
                 , new Landmark(Constant.HIGH_SCHOOL_FIELD, Constant.HIGH_SCHOOL_FIELD_POSITION)
                 , new Landmark(Constant.AS_FIELD, Constant.AS_FIELD_POSITION)
+        );
+    }
+
+    private List<LatLng> generateDummyBoundary() {
+        double lat = latlng.latitude;
+        double lon = latlng.longitude;
+        return Arrays.asList(
+                new LatLng(lat - .1, lon - .1)
+                , new LatLng(lat + .1, lon - .1)
+                , new LatLng(lat + .1, lon + .1)
+                , new LatLng(lat - .1, lon + .1)
         );
     }
 
