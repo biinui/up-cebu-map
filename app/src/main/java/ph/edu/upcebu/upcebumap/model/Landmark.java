@@ -11,8 +11,10 @@ import ph.edu.upcebu.upcebumap.util.Constant;
  * Created by yu on 11/8/2015.
  */
 public class Landmark {
+    private long id;
     private String title;
     private LatLng latlng;
+    private String category;
 
     public Landmark(String title, LatLng latlng) {
         this.title = title;

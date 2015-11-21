@@ -1,6 +1,5 @@
 package ph.edu.upcebu.upcebumap;
 
-import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 
@@ -9,8 +8,6 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import ph.edu.upcebu.upcebumap.model.Landmark;
@@ -75,6 +72,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         for (Landmark lm : Landmark.ActivityAreas()) {
             showMarker(lm);
         }
+    }
+
+    private void showBoundary() {
+
     }
 
 }
