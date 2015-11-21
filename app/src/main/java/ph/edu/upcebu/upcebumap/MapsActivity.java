@@ -14,6 +14,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polygon;
 import com.google.android.gms.maps.model.PolygonOptions;
 
 import java.util.List;
@@ -27,6 +28,7 @@ public class MapsActivity extends FragmentActivity
     private GoogleMap mMap;
     private boolean mIsActionMode = false;
     private Stack<LatLng> mSelectedPoints;
+    private Polygon mMutablePolygon;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,7 +91,7 @@ public class MapsActivity extends FragmentActivity
 
     private void showBoundary(List<LatLng> boundaries) {
         PolygonOptions po = new PolygonOptions().addAll(boundaries);
-        mMap.addPolygon(po);
+        mMutablePolygon = mMap.addPolygon(po);
     }
 
 
@@ -101,6 +103,7 @@ public class MapsActivity extends FragmentActivity
 
         mSelectedPoints = new Stack<LatLng>();
         mSelectedPoints.push(latLng);
+        showBoundary(mSelectedPoints);
         startActionMode(this);
     }
 
@@ -108,6 +111,7 @@ public class MapsActivity extends FragmentActivity
     public void onMapClick(LatLng latLng) {
         if (mIsActionMode) {
             mSelectedPoints.push(latLng);
+            showBoundary(mSelectedPoints);
         }
     }
 
@@ -127,7 +131,12 @@ public class MapsActivity extends FragmentActivity
     @Override
     public boolean onActionItemClicked(ActionMode actionMode, MenuItem menuItem) {
         switch (menuItem.getItemId()) {
-            case 0:
+            case R.id.contextMenuMapsUndo:
+                mSelectedPoints.pop();
+                showBoundary(mSelectedPoints);
+                return true;
+            case R.id.contextMenuMapsSave:
+                // TODO save to DB
                 return true;
             default:
                 return false;
@@ -136,6 +145,12 @@ public class MapsActivity extends FragmentActivity
 
     @Override
     public void onDestroyActionMode(ActionMode actionMode) {
+        mSelectedPoints.removeAllElements();
+        mMutablePolygon.remove();
         mIsActionMode = false;
+    }
+
+    private void showSaveBoundaryDialog() {
+
     }
 }
