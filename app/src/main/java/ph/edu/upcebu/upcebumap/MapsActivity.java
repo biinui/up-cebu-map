@@ -17,6 +17,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolygonOptions;
 
 import java.util.List;
+import java.util.Stack;
 
 import ph.edu.upcebu.upcebumap.model.Landmark;
 import ph.edu.upcebu.upcebumap.util.Constant;
@@ -25,6 +26,7 @@ public class MapsActivity extends FragmentActivity
         implements OnMapReadyCallback, GoogleMap.OnMapLongClickListener, GoogleMap.OnMapClickListener, ActionMode.Callback {
     private GoogleMap mMap;
     private boolean mIsActionMode = false;
+    private Stack<LatLng> mSelectedPoints;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,12 +99,16 @@ public class MapsActivity extends FragmentActivity
             return;
         }
 
+        mSelectedPoints = new Stack<LatLng>();
+        mSelectedPoints.push(latLng);
         startActionMode(this);
     }
 
     @Override
     public void onMapClick(LatLng latLng) {
-
+        if (mIsActionMode) {
+            mSelectedPoints.push(latLng);
+        }
     }
 
     @Override
