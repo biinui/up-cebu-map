@@ -1,4 +1,23 @@
 <resources>
     <string name="app_name">UP Cebu Map</string>
     <string name="title_activity_maps">Map</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_settings">Settings</string>
+    <string name="change_category">Change Category</string>
+    <string name="add_boundaries">Add Boundaries</string>
+    <string name="submit">Submit</string>
+
+    <string name="view_admin">Administrator</string>
+    <string name="view_guest">Guest</string>
+    <string name="view_landmark">Landmark</string>
+    <string name="view_category">Category</string>
+    <string name="add_landmark">Add Landmark</string>
+    <string name="select_category">Select Category</string>
+    <string name="show_map">Map</string>
+    <string name="title_activity_drawer">DrawerActivity</string>
+    <string name="title_activity_add_landmark">AddLandmarkActivity</string>
+    <string name="landmark_name">Name</string>
 </resources>

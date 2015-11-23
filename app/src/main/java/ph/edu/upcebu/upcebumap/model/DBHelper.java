@@ -1,0 +1,309 @@
+package ph.edu.upcebu.upcebumap.model;
+/**
+ * Created by user on 11/21/2015.
+ */
+
+import android.content.ContentValues;
+import android.content.Context;
+import android.database.Cursor;
+import android.database.DatabaseUtils;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
+
+import com.google.android.gms.maps.model.LatLng;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import ph.edu.upcebu.upcebumap.bean.Category;
+import ph.edu.upcebu.upcebumap.bean.Land;
+import ph.edu.upcebu.upcebumap.bean.Shape;
+
+public class DBHelper extends SQLiteOpenHelper {
+
+    public static final String DATABASE_NAME = "UPCebuMap.db";
+    public static final String LANDMARK_TABLE_NAME = "Landmark";
+    public static final String SHAPE_TABLE_NAME = "Shape";
+    public static final String BOUNDARY_TABLE_NAME = "Boundary";
+    public static final String CATEGORY_TABLE_NAME = "Category";
+
+    public static final String LANDMARK_COLUMN_ID = "landmark_id";
+    public static final String LANDMARK_COLUMN_XPOS = "xpos";
+    public static final String LANDMARK_COLUMN_YPOS = "ypos";
+    public static final String LANDMARK_COLUMN_TITLE = "title";
+    public static final String LANDMARK_COLUMN_CATEGORY = "category";
+    public static final String SHAPE_COLUMN_ID = "shape_id";
+    public static final String SHAPE_COLUMN_LID = "landmark_id";
+    public static final String SHAPE_COLUMN_SHAPETYPE = "shape_type";
+    public static final String SHAPE_COLUMN_SCOLOR = "stroke_color";
+    public static final String SHAPE_COLUMN_FCOLOR = "fill_color";
+    public static final String SHAPE_COLUMN_RADIUS = "radius";
+    public static final String BOUNDARY_COLUMN_ID = "boundary_id";
+    public static final String BOUNDARY_COLUMN_SID = "shape_id";
+    public static final String BOUNDARY_COLUMN_XPOS = "xpos";
+    public static final String BOUNDARY_COLUMN_YPOS = "ypos";
+    public static final String BOUNDARY_COLUMN_ISHOLE = "is_hole";
+    public static final String CATEGORY_COLUMN_ID = "category_id";
+    public static final String CATEGORY_COLUMN_NAME = "category";
+    public static final String CATEGORY_COLUMN_ICON = "icon";
+
+
+    private HashMap hp;
+
+    public DBHelper(Context context) {
+        super(context, DATABASE_NAME, null, 1);
+    }
+
+    @Override
+    public void onCreate(SQLiteDatabase db) {
+        // TODO Auto-generated method stub
+        db.execSQL(
+                "create table " + LANDMARK_TABLE_NAME +
+                        " (" + LANDMARK_COLUMN_ID + " integer primary key, " + LANDMARK_COLUMN_TITLE + " text, " +
+                        LANDMARK_COLUMN_XPOS + " real, " + LANDMARK_COLUMN_YPOS + " real, " + LANDMARK_COLUMN_CATEGORY + " text)"
+        );
+
+        db.execSQL(
+                "create table " + SHAPE_TABLE_NAME +
+                        " (" + SHAPE_COLUMN_ID + " integer primary key, " + SHAPE_COLUMN_LID + " integer, " +
+                        SHAPE_COLUMN_SHAPETYPE + " text, " + SHAPE_COLUMN_FCOLOR + " text, " + SHAPE_COLUMN_SCOLOR + " text, " + SHAPE_COLUMN_RADIUS + " integer)"
+        );
+
+        db.execSQL(
+                "create table " + BOUNDARY_TABLE_NAME +
+                        " (" + BOUNDARY_COLUMN_ID + " integer primary key, " + BOUNDARY_COLUMN_SID + " integer, " +
+                        BOUNDARY_COLUMN_XPOS + " real, " + BOUNDARY_COLUMN_YPOS + " real, " + BOUNDARY_COLUMN_ISHOLE + " integer)"
+        );
+
+        db.execSQL(
+                "create table " + CATEGORY_TABLE_NAME +
+                        " (" + CATEGORY_COLUMN_ID + " integer primary key, " + CATEGORY_COLUMN_NAME + " text, " +
+                        CATEGORY_COLUMN_ICON + " text)"
+        );
+    }
+
+    @Override
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        // TODO Auto-generated method stub
+        db.execSQL("DROP TABLE IF EXISTS " + LANDMARK_TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + SHAPE_TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + BOUNDARY_TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + CATEGORY_TABLE_NAME);
+        onCreate(db);
+    }
+
+    public long insertLandmark(String title, String category, double xpos, double pos) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(LANDMARK_COLUMN_TITLE, title);
+        contentValues.put(LANDMARK_COLUMN_CATEGORY, title);
+        contentValues.put(LANDMARK_COLUMN_XPOS, title);
+        contentValues.put(LANDMARK_COLUMN_YPOS, title);
+        long id = db.insert("contacts", null, contentValues);
+        return id;
+    }
+
+    public long insertBoundary(int sid, double xpos, double ypos, int ishole) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(BOUNDARY_COLUMN_SID, sid);
+        contentValues.put(BOUNDARY_COLUMN_XPOS, xpos);
+        contentValues.put(BOUNDARY_COLUMN_YPOS, ypos);
+        contentValues.put(BOUNDARY_COLUMN_ISHOLE, ishole);
+        long id = db.insert("contacts", null, contentValues);
+//        db.close();
+        return id;
+    }
+
+    public long insertShape(int lid, String stype, String scolor, String fcolor, int radius) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(SHAPE_COLUMN_LID, lid);
+        contentValues.put(SHAPE_COLUMN_SHAPETYPE, stype);
+        contentValues.put(SHAPE_COLUMN_SCOLOR, scolor);
+        contentValues.put(SHAPE_COLUMN_FCOLOR, fcolor);
+        contentValues.put(SHAPE_COLUMN_RADIUS, radius);
+        long id = db.insert("contacts", null, contentValues);
+//        db.close();
+        return id;
+    }
+
+    public long insertCategory(int cid, String name, String icon) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(CATEGORY_COLUMN_ID, cid);
+        contentValues.put(CATEGORY_COLUMN_NAME, name);
+        contentValues.put(CATEGORY_COLUMN_ICON, icon);
+        long id = db.insert("contacts", null, contentValues);
+//        db.close();
+        return id;
+    }
+
+    public Cursor getData(String tableName, String columnName, int id) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor res = db.rawQuery("select * from " + tableName + " where " + columnName + " = " + id + "", null);
+//        db.close();
+        return res;
+    }
+
+    public Cursor getData(String tableName, String columnName, String column) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor res = db.rawQuery("select * from " + tableName + " where " + columnName + " = '" + column + "' ", null);
+//        db.close();
+        return res;
+    }
+
+    public int numberOfRows(String tableName) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        int numRows = (int) DatabaseUtils.queryNumEntries(db, tableName);
+//        db.close();
+        return numRows;
+    }
+
+    public boolean updateLandmark(int id, String title, String category, double xpos, double pos) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(LANDMARK_COLUMN_TITLE, title);
+        contentValues.put(LANDMARK_COLUMN_CATEGORY, title);
+        contentValues.put(LANDMARK_COLUMN_XPOS, title);
+        contentValues.put(LANDMARK_COLUMN_YPOS, title);
+        db.update(LANDMARK_TABLE_NAME, contentValues, LANDMARK_COLUMN_ID + " = ? ", new String[]{Integer.toString(id)});
+//        db.close();
+        return true;
+    }
+
+    public boolean updateBoundary(int id, double xpos, double ypos, int ishole) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(BOUNDARY_COLUMN_XPOS, xpos);
+        contentValues.put(BOUNDARY_COLUMN_YPOS, ypos);
+        contentValues.put(BOUNDARY_COLUMN_ISHOLE, ishole);
+        db.update(BOUNDARY_TABLE_NAME, contentValues, BOUNDARY_COLUMN_SID + " = ? ", new String[]{Integer.toString(id)});
+//        db.close();
+        return true;
+    }
+
+    public boolean updateShape(int id, int lid, String stype, String scolor, String fcolor, int radius) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(SHAPE_COLUMN_LID, lid);
+        contentValues.put(SHAPE_COLUMN_SHAPETYPE, stype);
+        contentValues.put(SHAPE_COLUMN_SCOLOR, scolor);
+        contentValues.put(SHAPE_COLUMN_FCOLOR, fcolor);
+        contentValues.put(SHAPE_COLUMN_RADIUS, radius);
+        db.update(SHAPE_TABLE_NAME, contentValues, SHAPE_COLUMN_ID + " = ? ", new String[]{Integer.toString(id)});
+//        db.close();
+        return true;
+    }
+
+    public boolean updateCategory(int id, String name, String icon) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(CATEGORY_COLUMN_NAME, name);
+        contentValues.put(CATEGORY_COLUMN_ICON, icon);
+        db.update(CATEGORY_TABLE_NAME, contentValues, CATEGORY_COLUMN_ID + " = ? ", new String[]{Integer.toString(id)});
+//        db.close();
+        return true;
+    }
+
+    public Integer deleteItem(String tableName, String columnName, Integer id) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        Integer num = db.delete(tableName,
+                columnName + " = ? ",
+                new String[]{Integer.toString(id)});
+//        db.close();
+        return num;
+    }
+
+    public Integer deleteLandmark(int id) {
+        this.deleteItem(LANDMARK_TABLE_NAME, LANDMARK_COLUMN_ID, id);
+        Cursor shapeID = this.getData(SHAPE_TABLE_NAME, SHAPE_COLUMN_LID, id);
+        this.deleteItem(SHAPE_COLUMN_ID, SHAPE_COLUMN_LID, id);
+        return this.deleteItem(BOUNDARY_TABLE_NAME, SHAPE_COLUMN_ID, shapeID.getInt(shapeID.getColumnIndex(SHAPE_COLUMN_ID)));
+    }
+
+    public ArrayList<Category> getAllCategory() {
+        ArrayList<Category> array_list = new ArrayList<Category>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor res = db.rawQuery("select * from " + CATEGORY_TABLE_NAME, null);
+        res.moveToFirst();
+        Category category;
+        while (res.isAfterLast() == false) {
+            category = new Category(res.getInt(res.getColumnIndex(CATEGORY_COLUMN_ID)), res.getString(res.getColumnIndex(CATEGORY_COLUMN_NAME)), res.getString(res.getColumnIndex(CATEGORY_COLUMN_ICON)));
+            array_list.add(category);
+            res.moveToNext();
+        }
+//        db.close();
+
+        return array_list;
+    }
+
+    public ArrayList<Land> getAllLandmark() {
+        ArrayList<Land> array_list = new ArrayList<Land>();
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        Cursor res = db.rawQuery("select * from " + LANDMARK_TABLE_NAME, null);
+//        db.close();
+        res.moveToFirst();
+        Land landmark;
+        while (res.isAfterLast() == false) {
+            landmark = new Land();
+            landmark.setId(res.getInt(res.getColumnIndex(LANDMARK_COLUMN_ID)));
+            landmark.setTitle(res.getString(res.getColumnIndex(LANDMARK_COLUMN_TITLE)));
+            Cursor cur = this.getData(CATEGORY_TABLE_NAME, CATEGORY_COLUMN_NAME, res.getString(res.getColumnIndex(LANDMARK_COLUMN_CATEGORY)));
+            Category category = new Category(res.getInt(res.getColumnIndex(CATEGORY_COLUMN_ID)), res.getString(res.getColumnIndex(CATEGORY_COLUMN_NAME)), res.getString(res.getColumnIndex(CATEGORY_COLUMN_ICON)));
+            landmark.setCategory(category);
+            Cursor shape = this.getData(SHAPE_TABLE_NAME, BOUNDARY_COLUMN_SID, res.getInt(res.getColumnIndex(LANDMARK_COLUMN_ID)));
+            Shape landShape = new Shape();
+            landShape.setShapeID(res.getInt(res.getColumnIndex(SHAPE_COLUMN_ID)));
+            landShape.setLandmarkID(res.getInt(res.getColumnIndex(SHAPE_COLUMN_LID)));
+            landShape.setShapeType(res.getString(res.getColumnIndex(SHAPE_COLUMN_SHAPETYPE)));
+            landShape.setFillColor(res.getString(res.getColumnIndex(SHAPE_COLUMN_FCOLOR)));
+            landShape.setStrokeColor(res.getString(res.getColumnIndex(SHAPE_COLUMN_SCOLOR)));
+            landShape.setRadius(res.getInt(res.getColumnIndex(SHAPE_COLUMN_RADIUS)));
+            landmark.setShape(landShape);
+            Cursor boundary = this.getData(BOUNDARY_TABLE_NAME, BOUNDARY_COLUMN_SID, shape.getInt(shape.getColumnIndex(SHAPE_COLUMN_ID)));
+            while (boundary.isAfterLast() == false) {
+                landmark.addLatLngs(res.getDouble(res.getColumnIndex(BOUNDARY_COLUMN_XPOS)), res.getDouble(res.getColumnIndex(BOUNDARY_COLUMN_YPOS)));
+                boundary.moveToNext();
+            }
+            array_list.add(landmark);
+            res.moveToNext();
+        }
+
+        return array_list;
+    }
+
+    public void addLandmark(Land landmark) {
+        int id = (int) this.insertLandmark(landmark.getTitle(), landmark.getCategory().getCategoryName(), landmark.getXpos(), landmark.getYpos());
+        int sid = (int) this.insertShape(id, landmark.getShape().getShapeType(), landmark.getShape().getStrokeColor(), landmark.getShape().getFillColor(), landmark.getShape().getRadius());
+        for (LatLng bound : landmark.getLatLngs()) {
+            this.insertBoundary(sid, bound.latitude, bound.longitude, 0);
+        }
+    }
+
+    public void editLandmark(Land landmark) {
+        this.updateLandmark(landmark.getId(), landmark.getTitle(), landmark.getCategory().getCategoryName(), landmark.getXpos(), landmark.getYpos());
+        this.updateShape(landmark.getShape().getShapeID(), landmark.getShape().getLandmarkID(), landmark.getShape().getShapeType(), landmark.getShape().getStrokeColor(), landmark.getShape().getFillColor(), landmark.getShape().getRadius());
+        for (LatLng bound : landmark.getLatLngs()) {
+            this.updateBoundary(landmark.getShape().getShapeID(), bound.latitude, bound.longitude, 0);
+        }
+    }
+
+    /*
+    public ArrayList<String> getAllCotacts()
+    {
+        ArrayList<String> array_list = new ArrayList<String>();
+
+        //hp = new HashMap();
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor res =  db.rawQuery( "select * from contacts", null );
+        res.moveToFirst();
+
+        while(res.isAfterLast() == false){
+            array_list.add(res.getString(res.getColumnIndex(CONTACTS_COLUMN_NAME)));
+            res.moveToNext();
+        }
+        return array_list;
+    }*/
+}

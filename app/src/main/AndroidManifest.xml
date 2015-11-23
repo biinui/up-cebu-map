@@ -31,11 +31,25 @@
 
         <activity
             android:name=".MapsActivity"
-            android:label="@string/title_activity_maps">
+            android:label="@string/title_activity_maps"></activity>
+        <activity
+            android:name=".DrawerActivity"
+            android:label="@string/title_activity_drawer"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
+        <activity
+            android:name=".CategoryActivity"
+            android:label="@string/view_category"></activity>
+        <activity
+            android:name=".LandActivity"
+            android:label="@string/view_landmark">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity
+            android:name=".AddLandmarkActivity"
+            android:label="@string/add_landmark">
         </activity>
     </application>
 

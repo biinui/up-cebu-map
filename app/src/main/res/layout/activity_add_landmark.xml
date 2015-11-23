@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context="ph.edu.upcebu.upcebumap.AddLandmarkActivity">
+
+    <TextView
+        android:id="@+id/labellandmark_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="0dp"
+        android:text="@string/landmark_name"
+        android:textSize="18dp" />
+
+    <EditText
+        android:id="@+id/landmark_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/labellandmark_name"
+        android:layout_marginTop="30dp" />
+
+
+    <TextView
+        android:id="@+id/labelcategory"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_below="@+id/landmark_name"
+        android:layout_marginTop="120dp"
+        android:text="@string/view_category"
+        android:textSize="18dp" />
+
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/relativeLayout"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/labelcategory"
+        android:layout_marginTop="10dp"
+        android:background="#F3F3F3">
+
+        <ImageView
+            android:id="@+id/item_category_icon"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_alignParentLeft="true"
+            android:layout_marginBottom="8dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_marginTop="8dp"
+            android:src="@drawable/car" />
+
+        <TextView
+            android:id="@+id/item_category_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:layout_toRightOf="@+id/item_category_icon"
+            android:text="category"
+            android:textSize="20dp" />
+
+        <TextView
+            android:id="@+id/item_category_id_hidden"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
+            android:layout_toRightOf="@+id/item_icon"
+            android:text=""
+            android:textSize="16dp"
+            android:visibility="gone" />
+
+    </RelativeLayout>
+
+    <Button
+        android:id="@+id/change_category"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/labelcategory"
+        android:layout_marginTop="130dp"
+        android:background="#EB1E26"
+        android:padding="20dp"
+        android:text="@string/change_category"
+        android:textColor="#ffffff" />
+
+    <Button
+        android:id="@+id/add_boundaries"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/change_category"
+        android:layout_alignStart="@+id/change_category"
+        android:layout_below="@+id/change_category"
+        android:layout_marginTop="10dp"
+        android:background="#EB1E26"
+        android:padding="20dp"
+        android:text="@string/add_boundaries"
+        android:textColor="#ffffff" />
+
+    <Button
+        android:id="@+id/submit_landmark"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/change_category"
+        android:layout_alignStart="@+id/change_category"
+        android:layout_below="@+id/add_boundaries"
+        android:layout_marginTop="10dp"
+        android:background="#EB1E26"
+        android:padding="20dp"
+        android:text="@string/submit"
+        android:textColor="#ffffff" />
+
+</RelativeLayout>
