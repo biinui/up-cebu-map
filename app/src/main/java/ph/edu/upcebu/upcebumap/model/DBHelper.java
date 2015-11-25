@@ -99,23 +99,23 @@ public class DBHelper extends SQLiteOpenHelper {
         contentValues.put(LANDMARK_COLUMN_CATEGORY, title);
         contentValues.put(LANDMARK_COLUMN_XPOS, title);
         contentValues.put(LANDMARK_COLUMN_YPOS, title);
-        long id = db.insert("contacts", null, contentValues);
+        long id = db.insert(LANDMARK_TABLE_NAME, null, contentValues);
         return id;
     }
 
-    public long insertBoundary(int sid, double xpos, double ypos, int ishole) {
+    public long insertBoundary(long sid, double xpos, double ypos, int ishole) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put(BOUNDARY_COLUMN_SID, sid);
         contentValues.put(BOUNDARY_COLUMN_XPOS, xpos);
         contentValues.put(BOUNDARY_COLUMN_YPOS, ypos);
         contentValues.put(BOUNDARY_COLUMN_ISHOLE, ishole);
-        long id = db.insert("contacts", null, contentValues);
+        long id = db.insert(BOUNDARY_TABLE_NAME, null, contentValues);
 //        db.close();
         return id;
     }
 
-    public long insertShape(int lid, String stype, String scolor, String fcolor, int radius) {
+    public long insertShape(long lid, String stype, String scolor, String fcolor, int radius) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put(SHAPE_COLUMN_LID, lid);
@@ -123,7 +123,7 @@ public class DBHelper extends SQLiteOpenHelper {
         contentValues.put(SHAPE_COLUMN_SCOLOR, scolor);
         contentValues.put(SHAPE_COLUMN_FCOLOR, fcolor);
         contentValues.put(SHAPE_COLUMN_RADIUS, radius);
-        long id = db.insert("contacts", null, contentValues);
+        long id = db.insert(SHAPE_TABLE_NAME, null, contentValues);
 //        db.close();
         return id;
     }
@@ -134,7 +134,7 @@ public class DBHelper extends SQLiteOpenHelper {
         contentValues.put(CATEGORY_COLUMN_ID, cid);
         contentValues.put(CATEGORY_COLUMN_NAME, name);
         contentValues.put(CATEGORY_COLUMN_ICON, icon);
-        long id = db.insert("contacts", null, contentValues);
+        long id = db.insert(CATEGORY_TABLE_NAME, null, contentValues);
 //        db.close();
         return id;
     }
@@ -250,19 +250,21 @@ public class DBHelper extends SQLiteOpenHelper {
             landmark = new Land();
             landmark.setId(res.getInt(res.getColumnIndex(LANDMARK_COLUMN_ID)));
             landmark.setTitle(res.getString(res.getColumnIndex(LANDMARK_COLUMN_TITLE)));
-            Cursor cur = this.getData(CATEGORY_TABLE_NAME, CATEGORY_COLUMN_NAME, res.getString(res.getColumnIndex(LANDMARK_COLUMN_CATEGORY)));
-            Category category = new Category(res.getInt(res.getColumnIndex(CATEGORY_COLUMN_ID)), res.getString(res.getColumnIndex(CATEGORY_COLUMN_NAME)), res.getString(res.getColumnIndex(CATEGORY_COLUMN_ICON)));
-            landmark.setCategory(category);
+//            Cursor cur = this.getData(CATEGORY_TABLE_NAME, CATEGORY_COLUMN_NAME, res.getString(res.getColumnIndex(LANDMARK_COLUMN_CATEGORY)));
+//            Category category = new Category(res.getInt(res.getColumnIndex(CATEGORY_COLUMN_ID)), res.getString(res.getColumnIndex(CATEGORY_COLUMN_NAME)), res.getString(res.getColumnIndex(CATEGORY_COLUMN_ICON)));
+//            landmark.setCategory(category);
             Cursor shape = this.getData(SHAPE_TABLE_NAME, BOUNDARY_COLUMN_SID, res.getInt(res.getColumnIndex(LANDMARK_COLUMN_ID)));
             Shape landShape = new Shape();
-            landShape.setShapeID(res.getInt(res.getColumnIndex(SHAPE_COLUMN_ID)));
-            landShape.setLandmarkID(res.getInt(res.getColumnIndex(SHAPE_COLUMN_LID)));
-            landShape.setShapeType(res.getString(res.getColumnIndex(SHAPE_COLUMN_SHAPETYPE)));
-            landShape.setFillColor(res.getString(res.getColumnIndex(SHAPE_COLUMN_FCOLOR)));
-            landShape.setStrokeColor(res.getString(res.getColumnIndex(SHAPE_COLUMN_SCOLOR)));
-            landShape.setRadius(res.getInt(res.getColumnIndex(SHAPE_COLUMN_RADIUS)));
+            shape.moveToFirst();
+            landShape.setShapeID(shape.getInt(shape.getColumnIndex(SHAPE_COLUMN_ID)));
+            landShape.setLandmarkID(shape.getInt(shape.getColumnIndex(SHAPE_COLUMN_LID)));
+            landShape.setShapeType(shape.getString(shape.getColumnIndex(SHAPE_COLUMN_SHAPETYPE)));
+            landShape.setFillColor(shape.getString(shape.getColumnIndex(SHAPE_COLUMN_FCOLOR)));
+            landShape.setStrokeColor(shape.getString(shape.getColumnIndex(SHAPE_COLUMN_SCOLOR)));
+            landShape.setRadius(shape.getInt(shape.getColumnIndex(SHAPE_COLUMN_RADIUS)));
             landmark.setShape(landShape);
             Cursor boundary = this.getData(BOUNDARY_TABLE_NAME, BOUNDARY_COLUMN_SID, shape.getInt(shape.getColumnIndex(SHAPE_COLUMN_ID)));
+            boundary.moveToFirst();
             while (boundary.isAfterLast() == false) {
                 landmark.addLatLngs(res.getDouble(res.getColumnIndex(BOUNDARY_COLUMN_XPOS)), res.getDouble(res.getColumnIndex(BOUNDARY_COLUMN_YPOS)));
                 boundary.moveToNext();
