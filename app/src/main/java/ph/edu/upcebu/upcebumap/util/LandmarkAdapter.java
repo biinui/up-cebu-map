@@ -49,7 +49,7 @@ public class LandmarkAdapter extends ArrayAdapter<Land> {
         imgView.setImageResource(this.getImageId(modelsArrayList.get(position).getCategory().getIcon()));
         titleView.setText(modelsArrayList.get(position).getTitle());
         categoryView.setText(modelsArrayList.get(position).getCategory().getCategoryName());
-        idHidden.setText(modelsArrayList.get(position).getId());
+        idHidden.setText(String.valueOf(modelsArrayList.get(position).getId()));
 
         // 5. retrn rowView
         return rowView;

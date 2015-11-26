@@ -119,9 +119,9 @@ public class MapsActivity extends FragmentActivity
         }
 
         PolygonOptions po = new PolygonOptions().addAll(boundaries);
-        po.strokeWidth(1);
-        po.fillColor(Color.GRAY);
+        po.fillColor(Color.LTGRAY);
         po.strokeColor(Color.DKGRAY);
+        po.strokeWidth(1);
         mMutablePolygon = mMap.addPolygon(po);
 
         if (mMutablePolygon.getPoints().size() > 3) {
@@ -131,6 +131,9 @@ public class MapsActivity extends FragmentActivity
 
     private void showBoundary(List<LatLng> boundaries) {
         PolygonOptions po = new PolygonOptions().addAll(boundaries);
+        po.strokeColor(Color.LTGRAY);
+        po.fillColor(Color.WHITE);
+        po.strokeWidth(0.5f);
         mMap.addPolygon(po);
     }
 
@@ -182,7 +185,7 @@ public class MapsActivity extends FragmentActivity
             case R.id.contextMenuMapsSave:
                 long lid = mDB.insertLandmark("", "", mTemporaryMarker.getPosition().latitude, mTemporaryMarker.getPosition().longitude);
                 long sid = mDB.insertShape(lid, "", "", "", 0);
-                for (LatLng latlng : mSelectedPoints) {
+                for (LatLng latlng : mMutablePolygon.getPoints()) {
                     mDB.insertBoundary(sid, latlng.latitude, latlng.longitude, 0);
                 }
                 showBuildingMarkers();
@@ -196,8 +199,8 @@ public class MapsActivity extends FragmentActivity
     @Override
     public void onDestroyActionMode(ActionMode actionMode) {
         mSelectedPoints.removeAllElements();
-        mTemporaryMarker = null;
-        mMutablePolygon = null;
+        mTemporaryMarker.remove();
+        mMutablePolygon.remove();
         mActionMode = null;
     }
 

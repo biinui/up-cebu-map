@@ -8,7 +8,7 @@ import java.util.ArrayList;
  * Created by user on 11/22/2015.
  */
 public class Land {
-    private int id;
+    private long id;
     private Category category;
     private String title = "";
     private Shape shape;
@@ -61,11 +61,11 @@ public class Land {
         this.latLngs = latLngs;
     }
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 

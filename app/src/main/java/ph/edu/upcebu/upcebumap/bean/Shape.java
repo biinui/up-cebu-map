@@ -4,7 +4,7 @@ package ph.edu.upcebu.upcebumap.bean;
  * Created by user on 11/22/2015.
  */
 public class Shape {
-    private int shapeID;
+    private long shapeID;
     private int landmarkID;
     private String shapeType;
     private String strokeColor;
@@ -23,11 +23,11 @@ public class Shape {
         this.radius = radius;
     }
 
-    public int getShapeID() {
+    public long getShapeID() {
         return shapeID;
     }
 
-    public void setShapeID(int shapeID) {
+    public void setShapeID(long shapeID) {
         this.shapeID = shapeID;
     }
 
