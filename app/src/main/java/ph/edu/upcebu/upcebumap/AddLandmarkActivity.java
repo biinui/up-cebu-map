@@ -34,7 +34,7 @@ public class AddLandmarkActivity extends AppCompatActivity {
         TextView category = (TextView) findViewById(R.id.item_category_name);
         TextView hidden = (TextView) findViewById(R.id.item_category_id_hidden);
 
-        if (type.equals("edit")) {
+        if (type != null && type.equals("edit")) {
             position = Integer.parseInt(intent.getStringExtra("position"));
             getSupportActionBar().setTitle("Edit Landmark");
             ArrayList<Land> alllandmarks = db.getAllLandmark();
