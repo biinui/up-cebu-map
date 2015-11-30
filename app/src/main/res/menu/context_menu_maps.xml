@@ -14,4 +14,10 @@
         android:title="Save"
         app:showAsAction="always" />
 
+    <item
+        android:id="@+id/contextMenuMapsMarkerInfo"
+        android:icon="@drawable/ic_action_save"
+        android:title="Save"
+        app:showAsAction="always" />
+
 </menu>

@@ -1,5 +1,6 @@
 package ph.edu.upcebu.upcebumap;
 
+import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.view.ActionMode;
@@ -7,12 +8,18 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polygon;
 import com.google.android.gms.maps.model.PolygonOptions;
@@ -23,12 +30,19 @@ import java.util.Stack;
 import ph.edu.upcebu.upcebumap.model.Landmark;
 import ph.edu.upcebu.upcebumap.util.Constant;
 
+import static com.google.android.gms.common.api.GoogleApiClient.*;
+import static com.google.android.gms.maps.GoogleMap.*;
+
 public class MapsActivity extends FragmentActivity
-        implements OnMapReadyCallback, GoogleMap.OnMapLongClickListener, GoogleMap.OnMapClickListener, ActionMode.Callback {
+        implements OnMapReadyCallback, OnMapLongClickListener, OnMapClickListener, ActionMode.Callback, ConnectionCallbacks, OnConnectionFailedListener, LocationListener, OnMarkerClickListener {
     private GoogleMap mMap;
     private boolean mIsActionMode = false;
     private Stack<LatLng> mSelectedPoints;
     private Polygon mMutablePolygon;
+    private GoogleApiClient mGoogleApiClient;
+    private Location mLastLocation;
+    private LocationRequest mLocationRequest;
+    private boolean mIsMarkerClick = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +52,7 @@ public class MapsActivity extends FragmentActivity
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+        buildGoogleApiClient();
     }
 
     /**
@@ -57,10 +72,26 @@ public class MapsActivity extends FragmentActivity
         showActivityAreaMarkers();
         mMap.setOnMapLongClickListener(this);
         mMap.setOnMapClickListener(this);
+        mMap.setMyLocationEnabled(true);
+    }
+
+    protected synchronized void buildGoogleApiClient() {
+        mGoogleApiClient = new Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build();
+    }
+
+    protected void createLocationRequest() {
+        mLocationRequest = new LocationRequest();
+        mLocationRequest.setInterval(30000);
+        mLocationRequest.setFastestInterval(15000);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
     }
 
     private void showUPCebu() {
-        mMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
+        mMap.setOnMapLoadedCallback(new OnMapLoadedCallback() {
             @Override
             public void onMapLoaded() {
                 CameraPosition position = new CameraPosition.Builder()
@@ -125,6 +156,16 @@ public class MapsActivity extends FragmentActivity
 
     @Override
     public boolean onPrepareActionMode(ActionMode actionMode, Menu menu) {
+        MenuItem miUndo = menu.findItem(R.id.contextMenuMapsUndo);
+        MenuItem miSave = menu.findItem(R.id.contextMenuMapsSave);
+        MenuItem miInfo = menu.findItem(R.id.contextMenuMapsMarkerInfo);
+        if (mIsMarkerClick) {
+            miUndo.setVisible(false);
+            miSave.setVisible(false);
+        } else {
+            miInfo.setVisible(false);
+        }
+
         return false;
     }
 
@@ -148,9 +189,67 @@ public class MapsActivity extends FragmentActivity
         mSelectedPoints.removeAllElements();
         mMutablePolygon.remove();
         mIsActionMode = false;
+        mIsMarkerClick = false;
     }
 
     private void showSaveBoundaryDialog() {
 
+    }
+
+    @Override
+    public void onConnected(Bundle bundle) {
+        mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+        startLocationUpdates();
+    }
+
+    protected void startLocationUpdates() {
+        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        mLastLocation = location;
+        updateYouAreHereMarker();
+    }
+
+    private void updateYouAreHereMarker() {
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (mGoogleApiClient.isConnected()) startLocationUpdates();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        stopLocationUpdates();
+    }
+
+    protected void stopLocationUpdates() {
+        LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
+    }
+
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+        if (mIsActionMode) {
+            return false;
+        }
+
+        mIsMarkerClick = true;
+        startActionMode(this);
+        return false;
     }
 }
