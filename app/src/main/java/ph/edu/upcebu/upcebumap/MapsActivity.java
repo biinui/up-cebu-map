@@ -1,5 +1,6 @@
 package ph.edu.upcebu.upcebumap;
 
+import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
@@ -27,6 +28,8 @@ import com.google.android.gms.maps.model.PolygonOptions;
 import java.util.List;
 import java.util.Stack;
 
+import ph.edu.upcebu.upcebumap.bean.Land;
+import ph.edu.upcebu.upcebumap.model.DBHelper;
 import ph.edu.upcebu.upcebumap.model.Landmark;
 import ph.edu.upcebu.upcebumap.util.Constant;
 
@@ -36,9 +39,11 @@ import static com.google.android.gms.maps.GoogleMap.*;
 public class MapsActivity extends FragmentActivity
         implements OnMapReadyCallback, OnMapLongClickListener, OnMapClickListener, ActionMode.Callback, ConnectionCallbacks, OnConnectionFailedListener, LocationListener, OnMarkerClickListener {
     private GoogleMap mMap;
-    private boolean mIsActionMode = false;
+    private ActionMode mActionMode;
     private Stack<LatLng> mSelectedPoints;
     private Polygon mMutablePolygon;
+    private Marker mTemporaryMarker;
+    private DBHelper mDB;
     private GoogleApiClient mGoogleApiClient;
     private Location mLastLocation;
     private LocationRequest mLocationRequest;
@@ -52,6 +57,8 @@ public class MapsActivity extends FragmentActivity
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+        mDB = new DBHelper(this);
+        createLocationRequest();
         buildGoogleApiClient();
     }
 
@@ -108,9 +115,22 @@ public class MapsActivity extends FragmentActivity
         mMap.addMarker(new MarkerOptions().position(lm.getLatlng()).title(lm.getTitle()));
     }
 
+    private void showMarker(LatLng latlng) {
+        mMap.addMarker(new MarkerOptions().position(latlng));
+    }
+
+    private void showTemporaryMarker(LatLng latlng) {
+        mTemporaryMarker = mMap.addMarker(new MarkerOptions().position(latlng));
+    }
+
     private void showBuildingMarkers() {
         for (Landmark lm : Landmark.Buildings()) {
             showMarker(lm);
+        }
+
+        for (Land land : mDB.getAllLandmark()) {
+            showBoundary(land.getLatLngs());
+            showMarker(calculateMarkerCoordinate(land.getLatLngs()));
         }
     }
 
@@ -120,35 +140,57 @@ public class MapsActivity extends FragmentActivity
         }
     }
 
-    private void showBoundary(List<LatLng> boundaries) {
+    private void showTemporaryBoundary(List<LatLng> boundaries) {
+        if (mMutablePolygon != null) {
+            mMutablePolygon.remove();
+        }
+
+        if (mTemporaryMarker != null) {
+            mTemporaryMarker.remove();
+        }
+
         PolygonOptions po = new PolygonOptions().addAll(boundaries);
+        po.fillColor(Color.LTGRAY);
+        po.strokeColor(Color.DKGRAY);
+        po.strokeWidth(1);
         mMutablePolygon = mMap.addPolygon(po);
+
+        if (mMutablePolygon.getPoints().size() > 3) {
+            showTemporaryMarker(calculateMarkerCoordinate(mMutablePolygon.getPoints()));
+        }
     }
 
+    private void showBoundary(List<LatLng> boundaries) {
+        PolygonOptions po = new PolygonOptions().addAll(boundaries);
+        po.strokeColor(Color.LTGRAY);
+        po.fillColor(Color.WHITE);
+        po.strokeWidth(0.5f);
+        mMap.addPolygon(po);
+    }
 
     @Override
     public void onMapLongClick(LatLng latLng) {
-        if (mIsActionMode) {
+        if (mActionMode != null) {
             return;
         }
 
         mSelectedPoints = new Stack<LatLng>();
         mSelectedPoints.push(latLng);
-        showBoundary(mSelectedPoints);
+        showTemporaryBoundary(mSelectedPoints);
         startActionMode(this);
     }
 
     @Override
     public void onMapClick(LatLng latLng) {
-        if (mIsActionMode) {
+        if (mActionMode != null) {
             mSelectedPoints.push(latLng);
-            showBoundary(mSelectedPoints);
+            showTemporaryBoundary(mSelectedPoints);
         }
     }
 
     @Override
     public boolean onCreateActionMode(ActionMode actionMode, Menu menu) {
-        mIsActionMode = true;
+        mActionMode = actionMode;
         MenuInflater inflater = actionMode.getMenuInflater();
         inflater.inflate(R.menu.context_menu_maps, menu);
         return true;
@@ -173,11 +215,20 @@ public class MapsActivity extends FragmentActivity
     public boolean onActionItemClicked(ActionMode actionMode, MenuItem menuItem) {
         switch (menuItem.getItemId()) {
             case R.id.contextMenuMapsUndo:
+                if (mSelectedPoints.empty()) {
+                    return true;
+                }
                 mSelectedPoints.pop();
-                showBoundary(mSelectedPoints);
+                showTemporaryBoundary(mSelectedPoints);
                 return true;
             case R.id.contextMenuMapsSave:
-                // TODO save to DB
+                long lid = mDB.insertLandmark("", "", mTemporaryMarker.getPosition().latitude, mTemporaryMarker.getPosition().longitude);
+                long sid = mDB.insertShape(lid, "", "", "", 0);
+                for (LatLng latlng : mMutablePolygon.getPoints()) {
+                    mDB.insertBoundary(sid, latlng.latitude, latlng.longitude, 0);
+                }
+                showBuildingMarkers();
+                mActionMode.finish();
                 return true;
             default:
                 return false;
@@ -187,13 +238,31 @@ public class MapsActivity extends FragmentActivity
     @Override
     public void onDestroyActionMode(ActionMode actionMode) {
         mSelectedPoints.removeAllElements();
+        mTemporaryMarker.remove();
         mMutablePolygon.remove();
-        mIsActionMode = false;
+        mActionMode = null;
         mIsMarkerClick = false;
+    }
+
+    private LatLng calculateMarkerCoordinate(List<LatLng> coordinates) {
+        double x = 0;
+        double y = 0;
+        for (LatLng latlng : coordinates) {
+            x += latlng.latitude;
+            y += latlng.longitude;
+        }
+        double len = coordinates.size();
+        return new LatLng(x / len, y / len);
     }
 
     private void showSaveBoundaryDialog() {
 
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        mDB.close();
     }
 
     @Override
@@ -244,7 +313,7 @@ public class MapsActivity extends FragmentActivity
 
     @Override
     public boolean onMarkerClick(Marker marker) {
-        if (mIsActionMode) {
+        if (mActionMode != null) {
             return false;
         }
 
