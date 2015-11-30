@@ -33,11 +33,17 @@ import ph.edu.upcebu.upcebumap.model.DBHelper;
 import ph.edu.upcebu.upcebumap.model.Landmark;
 import ph.edu.upcebu.upcebumap.util.Constant;
 
-import static com.google.android.gms.common.api.GoogleApiClient.*;
-import static com.google.android.gms.maps.GoogleMap.*;
+import static com.google.android.gms.common.api.GoogleApiClient.Builder;
+import static com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
+import static com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
+import static com.google.android.gms.maps.GoogleMap.OnInfoWindowClickListener;
+import static com.google.android.gms.maps.GoogleMap.OnMapClickListener;
+import static com.google.android.gms.maps.GoogleMap.OnMapLoadedCallback;
+import static com.google.android.gms.maps.GoogleMap.OnMapLongClickListener;
+import static com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
 
 public class MapsActivity extends FragmentActivity
-        implements OnMapReadyCallback, OnMapLongClickListener, OnMapClickListener, ActionMode.Callback, ConnectionCallbacks, OnConnectionFailedListener, LocationListener, OnMarkerClickListener {
+        implements OnMapReadyCallback, OnMapLongClickListener, OnMapClickListener, ActionMode.Callback, ConnectionCallbacks, OnConnectionFailedListener, LocationListener, OnMarkerClickListener, OnInfoWindowClickListener {
     private GoogleMap mMap;
     private ActionMode mActionMode;
     private Stack<LatLng> mSelectedPoints;
@@ -47,7 +53,6 @@ public class MapsActivity extends FragmentActivity
     private GoogleApiClient mGoogleApiClient;
     private Location mLastLocation;
     private LocationRequest mLocationRequest;
-    private boolean mIsMarkerClick = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -119,6 +124,22 @@ public class MapsActivity extends FragmentActivity
         mMap.addMarker(new MarkerOptions().position(latlng));
     }
 
+    private void showMarker(Land land) {
+        LatLng position = new LatLng(land.getXpos(), land.getYpos());
+        StringBuilder snippet = new StringBuilder();
+
+        for (String room : land.getRooms()) {
+            snippet.append(room);
+            snippet.append('\n');
+        }
+
+        snippet.deleteCharAt(snippet.length() - 1);
+
+        mTemporaryMarker = mMap.addMarker(new MarkerOptions().position(position).title(land.getTitle()).snippet(snippet.toString()));
+        mTemporaryMarker.hideInfoWindow();
+        mTemporaryMarker = null;
+    }
+
     private void showTemporaryMarker(LatLng latlng) {
         mTemporaryMarker = mMap.addMarker(new MarkerOptions().position(latlng));
     }
@@ -130,7 +151,8 @@ public class MapsActivity extends FragmentActivity
 
         for (Land land : mDB.getAllLandmark()) {
             showBoundary(land.getLatLngs());
-            showMarker(calculateMarkerCoordinate(land.getLatLngs()));
+//            showMarker(calculateMarkerCoordinate(land.getLatLngs()));
+            showMarker(land);
         }
     }
 
@@ -198,16 +220,6 @@ public class MapsActivity extends FragmentActivity
 
     @Override
     public boolean onPrepareActionMode(ActionMode actionMode, Menu menu) {
-        MenuItem miUndo = menu.findItem(R.id.contextMenuMapsUndo);
-        MenuItem miSave = menu.findItem(R.id.contextMenuMapsSave);
-        MenuItem miInfo = menu.findItem(R.id.contextMenuMapsMarkerInfo);
-        if (mIsMarkerClick) {
-            miUndo.setVisible(false);
-            miSave.setVisible(false);
-        } else {
-            miInfo.setVisible(false);
-        }
-
         return false;
     }
 
@@ -241,7 +253,6 @@ public class MapsActivity extends FragmentActivity
         mTemporaryMarker.remove();
         mMutablePolygon.remove();
         mActionMode = null;
-        mIsMarkerClick = false;
     }
 
     private LatLng calculateMarkerCoordinate(List<LatLng> coordinates) {
@@ -313,12 +324,16 @@ public class MapsActivity extends FragmentActivity
 
     @Override
     public boolean onMarkerClick(Marker marker) {
-        if (mActionMode != null) {
-            return false;
+        if (marker.isInfoWindowShown()) {
+            marker.hideInfoWindow();
+        } else {
+            marker.showInfoWindow();
         }
-
-        mIsMarkerClick = true;
-        startActionMode(this);
         return false;
+    }
+
+    @Override
+    public void onInfoWindowClick(Marker marker) {
+        // TODO go to Land directory dialog or activity
     }
 }

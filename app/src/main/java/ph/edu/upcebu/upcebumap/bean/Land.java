@@ -3,6 +3,7 @@ package ph.edu.upcebu.upcebumap.bean;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by user on 11/22/2015.
@@ -16,6 +17,7 @@ public class Land {
     private int ypos;
     private ArrayList<LatLng> latLngs;
 
+    private List<String> rooms;
     public Land() {
         setCategory(new Category());
         setTitle("");
@@ -91,5 +93,13 @@ public class Land {
 
     public void setYpos(int ypos) {
         this.ypos = ypos;
+    }
+
+    public List<String> getRooms() {
+        return rooms;
+    }
+
+    public void setRooms(List<String> rooms) {
+        this.rooms = rooms;
     }
 }
