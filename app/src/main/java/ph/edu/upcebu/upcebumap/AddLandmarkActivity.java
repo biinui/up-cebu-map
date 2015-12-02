@@ -5,17 +5,25 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.google.android.gms.maps.model.LatLng;
+
 import java.util.ArrayList;
+import java.util.List;
 
 import ph.edu.upcebu.upcebumap.bean.Land;
 import ph.edu.upcebu.upcebumap.model.DBHelper;
 
 public class AddLandmarkActivity extends AppCompatActivity {
+    public static final String LAT = "LAT";
+    public static final String LNG = "LNG";
+    public static List<LatLng> BOUNDARIES;
     String type = "";
 
     @Override
@@ -23,13 +31,15 @@ public class AddLandmarkActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_landmark);
         Intent intent = getIntent();
-        DBHelper db = new DBHelper(this);
+        final DBHelper db = new DBHelper(this);
         int position = -1;
         type = intent.getStringExtra("type");
-        Button changeCategory = (Button) findViewById(R.id.change_category);
-        Button addBoundaries = (Button) findViewById(R.id.add_boundaries);
+        final Spinner spinnerCategory = (Spinner) findViewById(R.id.spinnerCategory);
+
+        spinnerCategory.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, getResources().getStringArray(R.array.categories)));
+
         Button submit = (Button) findViewById(R.id.submit_landmark);
-        EditText title = (EditText) findViewById(R.id.landmark_name);
+        final EditText title = (EditText) findViewById(R.id.landmark_name);
         ImageView icon = (ImageView) findViewById(R.id.item_category_icon);
         TextView category = (TextView) findViewById(R.id.item_category_name);
         TextView hidden = (TextView) findViewById(R.id.item_category_id_hidden);
@@ -42,37 +52,26 @@ public class AddLandmarkActivity extends AppCompatActivity {
             title.setText(landmark.getTitle());
             icon.setImageResource(getImageId(this, landmark.getCategory().getIcon()));
             category.setText(landmark.getCategory().getCategoryName());
-            addBoundaries.setText("Edit Boundaries");
         } else {
             getSupportActionBar().setTitle("Add Landmark");
         }
 
-        changeCategory.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                // Perform action on click
-            }
-        });
-
-        addBoundaries.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                // Perform action on click
-            }
-        });
-
         submit.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 // Perform action on click
-                Land landmark = new Land();
-
-                // Set all in landmark
-
+//                Land landmark = new Land();
                 DBHelper db = new DBHelper(getApplicationContext());
-                if (AddLandmarkActivity.this.type.equals("add")) {
-                    db.addLandmark(landmark);
-                } else {
-                    db.editLandmark(landmark);
+                // Set all in landmark
+                String t = title.getText().toString();
+                String category = spinnerCategory.getSelectedItem().toString();
+                double lat = getIntent().getDoubleExtra(LAT, 0);
+                double lng = getIntent().getDoubleExtra(LNG, 0);
+                long lid = db.insertLandmark(t, category, lat, lng);
+                long sid = db.insertShape(lid, "", "", "", 0);
+                for (LatLng latlng : BOUNDARIES) {
+                    db.insertBoundary(sid, latlng.latitude, latlng.longitude, 0);
                 }
-
+                finish();
             }
         });
 

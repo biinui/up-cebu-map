@@ -1,5 +1,6 @@
 package ph.edu.upcebu.upcebumap;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
@@ -133,10 +134,17 @@ public class MapsActivity extends FragmentActivity
             snippet.append('\n');
         }
 
-        if (snippet.length() > 0) snippet.deleteCharAt(snippet.length() - 1);
+        String title = land.getTitle();
+        if (title.isEmpty()) title = "Unknown";
 
-        mTemporaryMarker = mMap.addMarker(new MarkerOptions().position(position).title(land.getTitle()).snippet(snippet.toString()));
-        mTemporaryMarker.hideInfoWindow();
+        MarkerOptions mo = new MarkerOptions().position(position).title(title);
+
+        if (snippet.length() > 0) {
+            snippet.deleteCharAt(snippet.length() - 1);
+            mo.snippet(snippet.toString());
+        }
+
+        mMap.addMarker(mo);
     }
 
     private void showTemporaryMarker(LatLng latlng) {
@@ -176,7 +184,7 @@ public class MapsActivity extends FragmentActivity
         po.strokeWidth(1);
         mMutablePolygon = mMap.addPolygon(po);
 
-        if (mMutablePolygon.getPoints().size() > 3) {
+        if (mMutablePolygon.getPoints().size() > 0) {
             showTemporaryMarker(calculateMarkerCoordinate(mMutablePolygon.getPoints()));
         }
     }
@@ -233,12 +241,11 @@ public class MapsActivity extends FragmentActivity
                 showTemporaryBoundary(mSelectedPoints);
                 return true;
             case R.id.contextMenuMapsSave:
-                long lid = mDB.insertLandmark("", "", mTemporaryMarker.getPosition().latitude, mTemporaryMarker.getPosition().longitude);
-                long sid = mDB.insertShape(lid, "", "", "", 0);
-                for (LatLng latlng : mMutablePolygon.getPoints()) {
-                    mDB.insertBoundary(sid, latlng.latitude, latlng.longitude, 0);
-                }
-                showBuildingMarkers();
+                Intent intent = new Intent(this, AddLandmarkActivity.class);
+                intent.putExtra(AddLandmarkActivity.LAT, mTemporaryMarker.getPosition().latitude);
+                intent.putExtra(AddLandmarkActivity.LNG, mTemporaryMarker.getPosition().longitude);
+                AddLandmarkActivity.BOUNDARIES = mMutablePolygon.getPoints();
+                startActivity(intent);
                 mActionMode.finish();
                 return true;
             default:
@@ -271,9 +278,13 @@ public class MapsActivity extends FragmentActivity
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
-        mDB.close();
+    protected void onStart() {
+        super.onStart();
+        if (mMap != null) {
+            showUPCebu();
+            showBuildingMarkers();
+            showActivityAreaMarkers();
+        }
     }
 
     @Override
@@ -325,11 +336,6 @@ public class MapsActivity extends FragmentActivity
 
     @Override
     public boolean onMarkerClick(Marker marker) {
-        if (marker.isInfoWindowShown()) {
-            marker.hideInfoWindow();
-        } else {
-            marker.showInfoWindow();
-        }
         return false;
     }
 
