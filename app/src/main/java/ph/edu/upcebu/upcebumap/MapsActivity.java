@@ -11,6 +11,8 @@ import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.SearchView;
@@ -87,6 +89,24 @@ public class MapsActivity extends FragmentActivity
         mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
                                                @Override
                                                public boolean onQueryTextSubmit(String query) {
+                                                   search("");
+                                                   String title = (String) mListView.getItemAtPosition(0);
+
+                                                   if (title == null) {
+                                                       return false;
+                                                   }
+
+                                                   Cursor cursor = mDB.getLandmarkLikeTitle(title);
+                                                   cursor.moveToFirst();
+                                                   double lat = cursor.getDouble(cursor.getColumnIndex(DBHelper.LANDMARK_COLUMN_XPOS));
+                                                   double lng = cursor.getDouble(cursor.getColumnIndex(DBHelper.LANDMARK_COLUMN_YPOS));
+                                                   if (mMap != null) {
+                                                       CameraPosition cameraPosition = new CameraPosition.Builder()
+                                                               .target(new LatLng(lat, lng))
+                                                               .zoom(19f)
+                                                               .build();
+                                                       mMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+                                                   }
                                                    return false;
                                                }
 
@@ -98,6 +118,25 @@ public class MapsActivity extends FragmentActivity
                                            }
 
         );
+
+        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                search("");
+                String title = (String) mListView.getItemAtPosition(position);
+                Cursor cursor = mDB.getLandmarkWithTitle(title);
+                cursor.moveToFirst();
+                double lat = cursor.getDouble(cursor.getColumnIndex(DBHelper.LANDMARK_COLUMN_XPOS));
+                double lng = cursor.getDouble(cursor.getColumnIndex(DBHelper.LANDMARK_COLUMN_YPOS));
+                if (mMap != null) {
+                    CameraPosition cameraPosition = new CameraPosition.Builder()
+                            .target(new LatLng(lat, lng))
+                            .zoom(19f)
+                            .build();
+                    mMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+                }
+            }
+        });
     }
 
     /**

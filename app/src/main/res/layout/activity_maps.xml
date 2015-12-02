@@ -25,7 +25,8 @@
         android:layout_alignLeft="@+id/searchView"
         android:layout_alignRight="@+id/searchView"
         android:layout_alignStart="@+id/searchView"
-        android:layout_below="@+id/searchView" />
+        android:layout_below="@+id/searchView"
+        android:background="@android:color/white" />
 
 
 </RelativeLayout>

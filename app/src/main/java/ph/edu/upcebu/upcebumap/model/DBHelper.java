@@ -159,6 +159,18 @@ public class DBHelper extends SQLiteOpenHelper {
         return res;
     }
 
+    public Cursor getLandmarkWithTitle(String column) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor res = db.rawQuery("select * from " + LANDMARK_TABLE_NAME + " where " + LANDMARK_COLUMN_TITLE + " = '" + column + "' ", null);
+        return res;
+    }
+
+    public Cursor getLandmarkLikeTitle(String column) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor res = db.rawQuery("select * from " + LANDMARK_TABLE_NAME + " where " + LANDMARK_COLUMN_TITLE + " like '%" + column + "%' ", null);
+        return res;
+    }
+
     public int numberOfRows(String tableName) {
         SQLiteDatabase db = this.getReadableDatabase();
         int numRows = (int) DatabaseUtils.queryNumEntries(db, tableName);
