@@ -17,7 +17,7 @@ public class Land {
     private int ypos;
     private ArrayList<LatLng> latLngs;
 
-    private List<String> rooms;
+    private List<String> rooms = new ArrayList<>();
     public Land() {
         setCategory(new Category());
         setTitle("");

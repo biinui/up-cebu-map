@@ -125,7 +125,7 @@ public class MapsActivity extends FragmentActivity
     }
 
     private void showMarker(Land land) {
-        LatLng position = new LatLng(land.getXpos(), land.getYpos());
+        LatLng position = calculateMarkerCoordinate(land.getLatLngs());
         StringBuilder snippet = new StringBuilder();
 
         for (String room : land.getRooms()) {
@@ -133,11 +133,10 @@ public class MapsActivity extends FragmentActivity
             snippet.append('\n');
         }
 
-        snippet.deleteCharAt(snippet.length() - 1);
+        if (snippet.length() > 0) snippet.deleteCharAt(snippet.length() - 1);
 
         mTemporaryMarker = mMap.addMarker(new MarkerOptions().position(position).title(land.getTitle()).snippet(snippet.toString()));
         mTemporaryMarker.hideInfoWindow();
-        mTemporaryMarker = null;
     }
 
     private void showTemporaryMarker(LatLng latlng) {
@@ -251,6 +250,7 @@ public class MapsActivity extends FragmentActivity
     public void onDestroyActionMode(ActionMode actionMode) {
         mSelectedPoints.removeAllElements();
         mTemporaryMarker.remove();
+        mTemporaryMarker = null;
         mMutablePolygon.remove();
         mActionMode = null;
     }
@@ -319,7 +319,8 @@ public class MapsActivity extends FragmentActivity
     }
 
     protected void stopLocationUpdates() {
-        LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
+        if (mGoogleApiClient.isConnected())
+            LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
     }
 
     @Override
