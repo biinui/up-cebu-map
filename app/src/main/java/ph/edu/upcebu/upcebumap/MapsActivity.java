@@ -1,14 +1,19 @@
 package ph.edu.upcebu.upcebumap;
 
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Color;
 import android.location.Location;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+import android.widget.SearchView;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -26,6 +31,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polygon;
 import com.google.android.gms.maps.model.PolygonOptions;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
@@ -54,6 +60,10 @@ public class MapsActivity extends FragmentActivity
     private GoogleApiClient mGoogleApiClient;
     private Location mLastLocation;
     private LocationRequest mLocationRequest;
+    private SearchView mSearchView;
+    private ListView mListView;
+    private ArrayAdapter<String> mAdapter;
+    private PopulateSearchResults searchTask;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,6 +76,28 @@ public class MapsActivity extends FragmentActivity
         mDB = new DBHelper(this);
         createLocationRequest();
         buildGoogleApiClient();
+
+        mSearchView = (SearchView) findViewById(R.id.searchView);
+
+        List<String> empty = new ArrayList<>();
+        mAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, empty);
+        mListView = (ListView) findViewById(R.id.listView);
+        mListView.setAdapter(mAdapter);
+
+        mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                                               @Override
+                                               public boolean onQueryTextSubmit(String query) {
+                                                   return false;
+                                               }
+
+                                               @Override
+                                               public boolean onQueryTextChange(String newText) {
+                                                   search(newText);
+                                                   return false;
+                                               }
+                                           }
+
+        );
     }
 
     /**
@@ -342,5 +374,50 @@ public class MapsActivity extends FragmentActivity
     @Override
     public void onInfoWindowClick(Marker marker) {
         // TODO go to Land directory dialog or activity
+    }
+
+    private void search(String query) {
+        if (searchTask != null) {
+            searchTask.isCancelled();
+        }
+
+        searchTask = new PopulateSearchResults(query);
+        searchTask.execute();
+    }
+
+    private class PopulateSearchResults extends AsyncTask<Void, Void, List<String>> {
+        private final String query;
+
+        public PopulateSearchResults(String query) {
+            this.query = query;
+        }
+
+        @Override
+        protected List<String> doInBackground(Void... params) {
+            if (query.isEmpty()) {
+                return new ArrayList<>();
+            }
+
+            List<String> lands = new ArrayList<>();
+            Cursor cursor = mDB.getAllLandmarksWithTitleLike(query);
+            cursor.moveToFirst();
+            while (!isCancelled() && !cursor.isAfterLast()) {
+                String title = cursor.getString(cursor.getColumnIndex(DBHelper.LANDMARK_COLUMN_TITLE));
+                lands.add(title);
+                cursor.moveToNext();
+            }
+            return lands;
+        }
+
+        @Override
+        protected void onPostExecute(List<String> results) {
+            if (isCancelled()) {
+                return;
+            }
+
+            mAdapter.clear();
+            mAdapter.addAll(results);
+            mAdapter.notifyDataSetChanged();
+        }
     }
 }
