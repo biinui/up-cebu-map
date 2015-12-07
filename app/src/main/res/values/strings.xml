@@ -14,10 +14,14 @@
     <string name="view_guest">Guest</string>
     <string name="view_landmark">Landmark</string>
     <string name="view_category">Category</string>
+    <string name="view_office">Office / Room</string>
     <string name="add_landmark">Add Landmark</string>
     <string name="select_category">Select Category</string>
     <string name="show_map">Map</string>
     <string name="title_activity_drawer">DrawerActivity</string>
     <string name="title_activity_add_landmark">AddLandmarkActivity</string>
     <string name="landmark_name">Name</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

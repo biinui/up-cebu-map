@@ -1,21 +1,27 @@
 package ph.edu.upcebu.upcebumap;
 
+import android.app.Fragment;
+import android.app.FragmentManager;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
-import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 
 public class DrawerActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener, LandmarkFragment.OnFragmentInteractionListener,
+        CategoryFragment.OnFragmentInteractionListener, RoomFragment.OnFragmentInteractionListener {
+
+    public void onFragmentInteraction(Uri uri) {
+        //you can leave it empty
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,6 +30,7 @@ public class DrawerActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        /*
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -32,6 +39,8 @@ public class DrawerActivity extends AppCompatActivity
                         .setAction("Action", null).show();
             }
         });
+        */
+
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -41,6 +50,19 @@ public class DrawerActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        Fragment fragment = new LandmarkFragment();
+        if (fragment != null) {
+            FragmentManager fragmentManager = getFragmentManager();
+            fragmentManager.beginTransaction()
+                    .replace(R.id.flContent, fragment).commit();
+            navigationView.getMenu().getItem(1).setChecked(true);
+            setTitle(navigationView.getMenu().getItem(1).getTitle());
+            drawer.closeDrawer(GravityCompat.START);
+        } else {
+            // error in creating fragment
+            Log.e("MainActivity", "Error in creating fragment");
+        }
     }
 
     @Override
@@ -68,9 +90,10 @@ public class DrawerActivity extends AppCompatActivity
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
+        /*
         if (id == R.id.action_settings) {
             return true;
-        }
+        }*/
 
         return super.onOptionsItemSelected(item);
     }
@@ -81,8 +104,51 @@ public class DrawerActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        Intent intent = null;
+        //Intent intent = null;
 
+        Fragment fragment = null;
+        switch (id) {
+            case R.id.nav_landmark:
+                fragment = new LandmarkFragment();
+                //Toast toast = Toast.makeText(this, "Wheeee!",Toast.LENGTH_SHORT);
+                //toast.show();
+                break;
+            case R.id.nav_map:
+                //fragment = new LoginFragment();
+                Intent i = new Intent(getApplicationContext(), MapsActivity.class);
+                startActivity(i);
+                break;
+            case R.id.nav_category:
+                fragment = new CategoryFragment();
+                break;
+            case R.id.nav_office:
+                fragment = new RoomFragment();
+                break;
+            default:
+                break;
+        }
+
+        if (fragment != null) {
+            FragmentManager fragmentManager = getFragmentManager();
+            fragmentManager.beginTransaction()
+                    .replace(R.id.flContent, fragment).commit();
+
+            // update selected item and title, then close the drawer
+            /*
+            mDrawerList.setItemChecked(position, true);
+            mDrawerList.setSelection(position);
+            setTitle(navMenuTitles[position]);
+            mDrawerLayout.closeDrawer(mDrawerList);
+            */
+            item.setChecked(true);
+            setTitle(item.getTitle());
+            DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+            drawer.closeDrawer(GravityCompat.START);
+        } else {
+            // error in creating fragment
+            Log.e("MainActivity", "Error in creating fragment");
+        }
+        /*
         if (id == R.id.nav_landmark) {
             intent = new Intent(this, LandActivity.class);
         } else if (id == R.id.nav_map) {
@@ -90,10 +156,9 @@ public class DrawerActivity extends AppCompatActivity
         } else if (id == R.id.nav_category) {
             intent = new Intent(this, CategoryActivity.class);
         }
+        */
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
-        startActivity(intent);
+        //startActivity(intent);
         return true;
     }
 }

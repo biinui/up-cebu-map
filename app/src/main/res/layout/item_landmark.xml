@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="60dp"
-    android:background="#F3F3F3">
+    android:layout_height="60dp">
 
     <ImageView
         android:id="@+id/item_icon"
@@ -22,7 +21,8 @@
         android:layout_marginTop="10dp"
         android:layout_toRightOf="@+id/item_icon"
         android:text="Landmark"
-        android:textSize="20dp" />
+        android:textColor="@color/txtColor"
+        android:textSize="18dp" />
 
     <TextView
         android:id="@+id/item_category"
@@ -31,7 +31,8 @@
         android:layout_marginTop="30dp"
         android:layout_toRightOf="@+id/item_icon"
         android:text="category"
-        android:textSize="16dp" />
+        android:textColor="@color/txtColorSub"
+        android:textSize="14dp" />
 
     <TextView
         android:id="@+id/item_landmark_id_hidden"

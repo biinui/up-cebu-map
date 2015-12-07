@@ -4,9 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.view.View;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
@@ -34,11 +32,11 @@ public class AddLandmarkActivity extends AppCompatActivity {
         final DBHelper db = new DBHelper(this);
         int position = -1;
         type = intent.getStringExtra("type");
-        final Spinner spinnerCategory = (Spinner) findViewById(R.id.spinnerCategory);
+        final Spinner spinnerCategory = (Spinner) findViewById(R.id.category_spinner);
 
         spinnerCategory.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, getResources().getStringArray(R.array.categories)));
 
-        Button submit = (Button) findViewById(R.id.submit_landmark);
+//        Button submit = (Button) findViewById(R.id.submit_landmark);
         final EditText title = (EditText) findViewById(R.id.landmark_name);
         ImageView icon = (ImageView) findViewById(R.id.item_category_icon);
         TextView category = (TextView) findViewById(R.id.item_category_name);
@@ -56,24 +54,24 @@ public class AddLandmarkActivity extends AppCompatActivity {
             getSupportActionBar().setTitle("Add Landmark");
         }
 
-        submit.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                // Perform action on click
-//                Land landmark = new Land();
-                DBHelper db = new DBHelper(getApplicationContext());
-                // Set all in landmark
-                String t = title.getText().toString();
-                String category = spinnerCategory.getSelectedItem().toString();
-                double lat = getIntent().getDoubleExtra(LAT, 0);
-                double lng = getIntent().getDoubleExtra(LNG, 0);
-                long lid = db.insertLandmark(t, category, lat, lng);
-                long sid = db.insertShape(lid, "", "", "", 0);
-                for (LatLng latlng : BOUNDARIES) {
-                    db.insertBoundary(sid, latlng.latitude, latlng.longitude, 0);
-                }
-                finish();
-            }
-        });
+//        submit.setOnClickListener(new View.OnClickListener() {
+//            public void onClick(View v) {
+//                // Perform action on click
+////                Land landmark = new Land();
+//                DBHelper db = new DBHelper(getApplicationContext());
+//                // Set all in landmark
+//                String t = title.getText().toString();
+//                String category = spinnerCategory.getSelectedItem().toString();
+//                double lat = getIntent().getDoubleExtra(LAT, 0);
+//                double lng = getIntent().getDoubleExtra(LNG, 0);
+//                long lid = db.insertLandmark(t, category, lat, lng);
+//                long sid = db.insertShape(lid, "", "", "", 0);
+//                for (LatLng latlng : BOUNDARIES) {
+//                    db.insertBoundary(sid, latlng.latitude, latlng.longitude, 0);
+//                }
+//                finish();
+//            }
+//        });
 
 
     }

@@ -1,21 +1,30 @@
 package ph.edu.upcebu.upcebumap;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.FragmentActivity;
 import android.view.ActionMode;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.SearchView;
+import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -26,6 +35,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -37,10 +47,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
+import ph.edu.upcebu.upcebumap.bean.Category;
 import ph.edu.upcebu.upcebumap.bean.Land;
 import ph.edu.upcebu.upcebumap.model.DBHelper;
 import ph.edu.upcebu.upcebumap.model.Landmark;
 import ph.edu.upcebu.upcebumap.util.Constant;
+import ph.edu.upcebu.upcebumap.util.SpinnerAdapter;
 
 import static com.google.android.gms.common.api.GoogleApiClient.Builder;
 import static com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
@@ -52,7 +64,10 @@ import static com.google.android.gms.maps.GoogleMap.OnMapLongClickListener;
 import static com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
 
 public class MapsActivity extends FragmentActivity
-        implements OnMapReadyCallback, OnMapLongClickListener, OnMapClickListener, ActionMode.Callback, ConnectionCallbacks, OnConnectionFailedListener, LocationListener, OnMarkerClickListener, OnInfoWindowClickListener {
+        implements OnMapReadyCallback, OnMapLongClickListener, OnMapClickListener, ActionMode.Callback, ConnectionCallbacks, OnConnectionFailedListener, LocationListener, OnMarkerClickListener, OnInfoWindowClickListener, View.OnClickListener {
+    public static final String LAT = "LAT";
+    public static final String LNG = "LNG";
+    public static List<LatLng> BOUNDARIES;
     private GoogleMap mMap;
     private ActionMode mActionMode;
     private Stack<LatLng> mSelectedPoints;
@@ -66,6 +81,16 @@ public class MapsActivity extends FragmentActivity
     private ListView mListView;
     private ArrayAdapter<String> mAdapter;
     private PopulateSearchResults searchTask;
+    private View mView;
+    private Dialog mDialog;
+    private LayoutInflater mInflater;
+    private AlertDialog.Builder builder;
+    private Spinner dropdown;
+    private EditText name;
+    private AlertDialog dialog;
+    private ArrayList<Category> category;
+    private SpinnerAdapter categoryspinner;
+    private Category selectedCategory;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,7 +107,7 @@ public class MapsActivity extends FragmentActivity
         mSearchView = (SearchView) findViewById(R.id.searchView);
 
         List<String> empty = new ArrayList<>();
-        mAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, empty);
+        mAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, empty);
         mListView = (ListView) findViewById(R.id.listView);
         mListView.setAdapter(mAdapter);
 
@@ -137,6 +162,66 @@ public class MapsActivity extends FragmentActivity
                 }
             }
         });
+
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.list_home);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent i = new Intent(getApplicationContext(), DrawerActivity.class);
+                startActivity(i);
+            }
+        });
+
+
+        mInflater = (LayoutInflater) getBaseContext().getSystemService(
+                LAYOUT_INFLATER_SERVICE);
+
+        mView = mInflater.inflate(R.layout.activity_add_landmark, null);
+
+        if (mView.getParent() != null)
+            ((ViewGroup) mView.getParent()).removeView(mView);
+        // mDialog = new Dialog(this,0); // context, theme
+        dropdown = (Spinner) mView.findViewById(R.id.category_spinner);
+        category = mDB.getAllCategory();
+        categoryspinner = new SpinnerAdapter(this, android.R.layout.simple_spinner_dropdown_item, category);
+        dropdown.setAdapter(categoryspinner);
+        dropdown.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view,
+                                       int position, long id) {
+                // Here you get the current item (a User object) that is selected by its position
+                selectedCategory = categoryspinner.getItem(position);
+                // Here you can do the action you want to...
+                //Toast.makeText(MapsActivity.this, "ID: " + selectedCategory.getId() + "\nName: " + selectedCategory.getCategoryName(),Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapter) {
+            }
+        });
+
+
+        builder = new AlertDialog.Builder(MapsActivity.this);
+
+        builder.setView(this.mView);
+        builder.setCancelable(false);
+        //builder.setMessage("Test for preventing dialog close");
+        builder.setNegativeButton(android.R.string.cancel, null);
+        builder.setPositiveButton("Submit",
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        //Do nothing here because we override this button later to change the close behaviour.
+                        //However, we still need this because on older versions of Android unless we
+                        //pass a handler the button doesn't get instantiated
+                    }
+                });
+        dialog = builder.create();
+        //final AlertDialog dialog = builder.create();
+
+
+
     }
 
     /**
@@ -189,7 +274,13 @@ public class MapsActivity extends FragmentActivity
     }
 
     private void showMarker(Landmark lm) {
-        mMap.addMarker(new MarkerOptions().position(lm.getLatlng()).title(lm.getTitle()));
+        MarkerOptions marker = new MarkerOptions().position(lm.getLatlng()).title(lm.getTitle());
+
+        mMap.addMarker(marker);
+    }
+
+    public int getImageId(String imageName) {
+        return this.getApplication().getResources().getIdentifier("drawable/" + imageName, null, this.getApplication().getPackageName());
     }
 
     private void showMarker(LatLng latlng) {
@@ -209,7 +300,7 @@ public class MapsActivity extends FragmentActivity
         if (title.isEmpty()) title = "Unknown";
 
         MarkerOptions mo = new MarkerOptions().position(position).title(title);
-
+        mo.icon(BitmapDescriptorFactory.fromResource(getImageId(land.getCategory().getIcon())));
         if (snippet.length() > 0) {
             snippet.deleteCharAt(snippet.length() - 1);
             mo.snippet(snippet.toString());
@@ -227,10 +318,18 @@ public class MapsActivity extends FragmentActivity
             showMarker(lm);
         }
 
-        for (Land land : mDB.getAllLandmark()) {
-            showBoundary(land.getLatLngs());
-//            showMarker(calculateMarkerCoordinate(land.getLatLngs()));
-            showMarker(land);
+
+        List<Land> list = mDB.getAllLandmark();
+        if (list != null && list.size() > 0) {
+            for (Land land : list) {
+                List<LatLng> bound = land.getLatLngs();
+                if (bound != null) {
+                    showBoundary(bound);
+                    //            showMarker(calculateMarkerCoordinate(land.getLatLngs()));
+                    showMarker(land);
+                    bound = null;
+                }
+            }
         }
     }
 
@@ -261,11 +360,13 @@ public class MapsActivity extends FragmentActivity
     }
 
     private void showBoundary(List<LatLng> boundaries) {
-        PolygonOptions po = new PolygonOptions().addAll(boundaries);
-        po.strokeColor(Color.LTGRAY);
-        po.fillColor(Color.WHITE);
-        po.strokeWidth(0.5f);
-        mMap.addPolygon(po);
+        if (boundaries.size() > 0) {
+            PolygonOptions po = new PolygonOptions().addAll(boundaries);
+            po.strokeColor(Color.LTGRAY);
+            po.fillColor(Color.WHITE);
+            po.strokeWidth(0.5f);
+            mMap.addPolygon(po);
+        }
     }
 
     @Override
@@ -285,6 +386,7 @@ public class MapsActivity extends FragmentActivity
         if (mActionMode != null) {
             mSelectedPoints.push(latLng);
             showTemporaryBoundary(mSelectedPoints);
+            //Toast.makeText(MapsActivity.this, "ID: " + Arrays.toString(mSelectedPoints.toArray()),Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -312,12 +414,12 @@ public class MapsActivity extends FragmentActivity
                 showTemporaryBoundary(mSelectedPoints);
                 return true;
             case R.id.contextMenuMapsSave:
-                Intent intent = new Intent(this, AddLandmarkActivity.class);
-                intent.putExtra(AddLandmarkActivity.LAT, mTemporaryMarker.getPosition().latitude);
-                intent.putExtra(AddLandmarkActivity.LNG, mTemporaryMarker.getPosition().longitude);
-                AddLandmarkActivity.BOUNDARIES = mMutablePolygon.getPoints();
-                startActivity(intent);
-                mActionMode.finish();
+                dialog.show();
+
+                //Overriding the handler immediately after show is probably a better approach than OnShowListener as described below
+                dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(MapsActivity.this);
+
+
                 return true;
             default:
                 return false;
@@ -422,6 +524,41 @@ public class MapsActivity extends FragmentActivity
 
         searchTask = new PopulateSearchResults(query);
         searchTask.execute();
+    }
+
+    @Override
+    public void onClick(View v) {
+        Dialog f = dialog;
+        EditText nname = (EditText) f.findViewById(R.id.landmark_name);
+        Spinner spinnerCategory = (Spinner) f.findViewById(R.id.category_spinner);
+        if (nname == null || nname.getText().toString().equals("")) {
+            Toast toast = Toast.makeText(MapsActivity.this, "Landmark name should not be empty", Toast.LENGTH_LONG);
+            toast.show();
+        } else {
+            DBHelper db = new DBHelper(getApplicationContext());
+
+            // Set all in landmark
+            String t = nname.getText().toString();
+            String category = selectedCategory.getCategoryName();
+            double lat = 0;
+            double lng = 0;
+            String latitude = "";
+            long lid = db.insertLandmark(t, category.trim(), lat, lng);
+            long sid = db.insertShape(lid, "", "", "", 0);
+            List<LatLng> list = mSelectedPoints;
+            for (LatLng latlng : list) {
+                db.insertBoundary(sid, latlng.latitude, latlng.longitude, 0);
+                latitude += " " + latlng.latitude;
+            }
+            nname.setText("");
+            spinnerCategory.setSelection(0);
+            Toast toast = Toast.makeText(MapsActivity.this, "Information successfully added.", Toast.LENGTH_SHORT);
+            //Toast.makeText(MapsActivity.this, "ID: " + Arrays.toString(mSelectedPoints.toArray()),Toast.LENGTH_SHORT).show();
+            showBuildingMarkers();
+            showActivityAreaMarkers();
+            mActionMode.finish();
+            dialog.dismiss();
+        }
     }
 
     private class PopulateSearchResults extends AsyncTask<Void, Void, List<String>> {

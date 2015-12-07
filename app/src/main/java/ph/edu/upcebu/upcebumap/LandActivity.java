@@ -1,6 +1,5 @@
 package ph.edu.upcebu.upcebumap;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -52,7 +51,7 @@ public class LandActivity extends AppCompatActivity {
                 LandActivity.this.delete.setClickable(true);
             }
         });
-
+        /*
         add.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 Intent i = new Intent(getApplicationContext(), AddLandmarkActivity.class);
@@ -69,5 +68,6 @@ public class LandActivity extends AppCompatActivity {
                 startActivity(i);
             }
         });
+        */
     }
 }

@@ -14,6 +14,10 @@
             android:id="@+id/nav_category"
             android:icon="@drawable/ic_action_tags"
             android:title="@string/view_category" />
+        <item
+            android:id="@+id/nav_office"
+            android:icon="@drawable/ic_action_laptop"
+            android:title="@string/view_office" />
         <!--
         <item android:id="@+id/nav_slideshow" android:icon="@android:drawable/ic_menu_slideshow"
             android:title="Slideshow" />
