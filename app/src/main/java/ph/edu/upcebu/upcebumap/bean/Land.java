@@ -5,6 +5,8 @@ import com.google.android.gms.maps.model.LatLng;
 import java.util.ArrayList;
 import java.util.List;
 
+import ph.edu.upcebu.upcebumap.model.Room;
+
 /**
  * Created by user on 11/22/2015.
  */
@@ -17,7 +19,7 @@ public class Land {
     private int ypos;
     private ArrayList<LatLng> latLngs;
 
-    private List<String> rooms = new ArrayList<>();
+    private List<Room> rooms = new ArrayList<>();
     public Land() {
         setCategory(new Category());
         setTitle("");
@@ -95,11 +97,15 @@ public class Land {
         this.ypos = ypos;
     }
 
-    public List<String> getRooms() {
+    public void addRoom(Room room) {
+        this.rooms.add(room);
+    }
+
+    public List<Room> getRooms() {
         return rooms;
     }
 
-    public void setRooms(List<String> rooms) {
+    public void setRooms(List<Room> rooms) {
         this.rooms = rooms;
     }
 }

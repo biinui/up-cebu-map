@@ -4,10 +4,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -32,9 +30,9 @@ public class AddLandmarkActivity extends AppCompatActivity {
         final DBHelper db = new DBHelper(this);
         int position = -1;
         type = intent.getStringExtra("type");
-        final Spinner spinnerCategory = (Spinner) findViewById(R.id.category_spinner);
+//        final Spinner spinnerCategory = (Spinner) findViewById(R.id.spinnerCategory);
 
-        spinnerCategory.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, getResources().getStringArray(R.array.categories)));
+//        spinnerCategory.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, getResources().getStringArray(R.array.categories)));
 
 //        Button submit = (Button) findViewById(R.id.submit_landmark);
         final EditText title = (EditText) findViewById(R.id.landmark_name);

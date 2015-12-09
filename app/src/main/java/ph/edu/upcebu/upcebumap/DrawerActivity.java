@@ -1,11 +1,12 @@
 package ph.edu.upcebu.upcebumap;
 
-import android.app.Fragment;
-import android.app.FragmentManager;
+
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -17,7 +18,9 @@ import android.view.MenuItem;
 
 public class DrawerActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, LandmarkFragment.OnFragmentInteractionListener,
-        CategoryFragment.OnFragmentInteractionListener, RoomFragment.OnFragmentInteractionListener {
+        CategoryFragment.OnFragmentInteractionListener, RoomFragment.OnFragmentInteractionListener, LandmarkDetailsFragment.OnFragmentInteractionListener {
+
+    public static final String LAND_TITLE = "title";
 
     public void onFragmentInteraction(Uri uri) {
         //you can leave it empty
@@ -51,9 +54,11 @@ public class DrawerActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        Fragment fragment = new LandmarkFragment();
+        String title = getIntent().getStringExtra(LAND_TITLE);
+
+        Fragment fragment = new LandmarkFragment().newInstance(title);
         if (fragment != null) {
-            FragmentManager fragmentManager = getFragmentManager();
+            FragmentManager fragmentManager = getSupportFragmentManager();
             fragmentManager.beginTransaction()
                     .replace(R.id.flContent, fragment).commit();
             navigationView.getMenu().getItem(1).setChecked(true);
@@ -129,7 +134,7 @@ public class DrawerActivity extends AppCompatActivity
         }
 
         if (fragment != null) {
-            FragmentManager fragmentManager = getFragmentManager();
+            FragmentManager fragmentManager = getSupportFragmentManager();
             fragmentManager.beginTransaction()
                     .replace(R.id.flContent, fragment).commit();
 

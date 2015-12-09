@@ -64,7 +64,7 @@ import static com.google.android.gms.maps.GoogleMap.OnMapLongClickListener;
 import static com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
 
 public class MapsActivity extends FragmentActivity
-        implements OnMapReadyCallback, OnMapLongClickListener, OnMapClickListener, ActionMode.Callback, ConnectionCallbacks, OnConnectionFailedListener, LocationListener, OnMarkerClickListener, OnInfoWindowClickListener, View.OnClickListener {
+        implements OnMapReadyCallback, OnMapLongClickListener, OnMapClickListener, ActionMode.Callback, ConnectionCallbacks, OnConnectionFailedListener, LocationListener, OnMarkerClickListener, View.OnClickListener {
     public static final String LAT = "LAT";
     public static final String LNG = "LNG";
     public static List<LatLng> BOUNDARIES;
@@ -173,6 +173,7 @@ public class MapsActivity extends FragmentActivity
         });
 
 
+
         mInflater = (LayoutInflater) getBaseContext().getSystemService(
                 LAYOUT_INFLATER_SERVICE);
 
@@ -242,6 +243,14 @@ public class MapsActivity extends FragmentActivity
         mMap.setOnMapLongClickListener(this);
         mMap.setOnMapClickListener(this);
         mMap.setMyLocationEnabled(true);
+        mMap.setOnInfoWindowClickListener(new OnInfoWindowClickListener() {
+            @Override
+            public void onInfoWindowClick(Marker marker) {
+                Intent i = new Intent(getApplicationContext(), DrawerActivity.class);
+                i.putExtra(DrawerActivity.LAND_TITLE, marker.getTitle());
+                startActivity(i);
+            }
+        });
     }
 
     protected synchronized void buildGoogleApiClient() {
@@ -289,22 +298,22 @@ public class MapsActivity extends FragmentActivity
 
     private void showMarker(Land land) {
         LatLng position = calculateMarkerCoordinate(land.getLatLngs());
-        StringBuilder snippet = new StringBuilder();
+//        StringBuilder snippet = new StringBuilder();
 
-        for (String room : land.getRooms()) {
-            snippet.append(room);
-            snippet.append('\n');
-        }
+//        for (String room : land.getRooms()) {
+//            snippet.append(room);
+//            snippet.append('\n');
+//        }
 
         String title = land.getTitle();
         if (title.isEmpty()) title = "Unknown";
 
         MarkerOptions mo = new MarkerOptions().position(position).title(title);
         mo.icon(BitmapDescriptorFactory.fromResource(getImageId(land.getCategory().getIcon())));
-        if (snippet.length() > 0) {
-            snippet.deleteCharAt(snippet.length() - 1);
-            mo.snippet(snippet.toString());
-        }
+//        if (snippet.length() > 0) {
+//            snippet.deleteCharAt(snippet.length() - 1);
+//            mo.snippet(snippet.toString());
+//        }
 
         mMap.addMarker(mo);
     }
@@ -510,11 +519,6 @@ public class MapsActivity extends FragmentActivity
     @Override
     public boolean onMarkerClick(Marker marker) {
         return false;
-    }
-
-    @Override
-    public void onInfoWindowClick(Marker marker) {
-        // TODO go to Land directory dialog or activity
     }
 
     private void search(String query) {

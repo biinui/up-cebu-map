@@ -358,6 +358,23 @@ public class DBHelper extends SQLiteOpenHelper {
                 landmark.addLatLngs(x, y);
                 boundary.moveToNext();
             }
+
+            Cursor rooms = this.getData(ROOM_TABLE_NAME, ROOM_COLUMN_BUILDING, lid);
+            rooms.moveToFirst();
+            while (rooms.isAfterLast() == false) {
+                Room room = new Room();
+                room.setId(rooms.getLong(rooms.getColumnIndex(ROOM_COLUMN_ID)));
+                room.setType(rooms.getString(rooms.getColumnIndex(ROOM_COLUMN_TYPE)));
+                room.setOffice(rooms.getString(rooms.getColumnIndex(ROOM_COLUMN_OFFICE)));
+                room.setRoom(rooms.getString(rooms.getColumnIndex(ROOM_COLUMN_ROOM)));
+                room.setPhone(rooms.getString(rooms.getColumnIndex(ROOM_COLUMN_PHONE)));
+                room.setHead(rooms.getString(rooms.getColumnIndex(ROOM_COLUMN_HEAD)));
+                room.setDescription(rooms.getString(rooms.getColumnIndex(ROOM_COLUMN_DESCRIPTION)));
+                room.setLandmarkId(rooms.getLong(rooms.getColumnIndex(ROOM_COLUMN_BUILDING)));
+                landmark.addRoom(room);
+                rooms.moveToNext();
+            }
+
             array_list.add(landmark);
             landmarkCursor.moveToNext();
         }
