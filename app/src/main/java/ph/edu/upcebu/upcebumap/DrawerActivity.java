@@ -1,6 +1,5 @@
 package ph.edu.upcebu.upcebumap;
 
-
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -19,7 +18,6 @@ import android.view.MenuItem;
 public class DrawerActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, LandmarkFragment.OnFragmentInteractionListener,
         CategoryFragment.OnFragmentInteractionListener, RoomFragment.OnFragmentInteractionListener, LandmarkDetailsFragment.OnFragmentInteractionListener {
-
     public static final String LAND_TITLE = "title";
 
     public void onFragmentInteraction(Uri uri) {
@@ -44,6 +42,9 @@ public class DrawerActivity extends AppCompatActivity
         });
         */
 
+        Intent intent = getIntent();
+        int item = intent.getIntExtra("item", -1);
+
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -53,16 +54,22 @@ public class DrawerActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+        Fragment fragment;
+        if (item == 3) {
+            fragment = new RoomFragment();
+        } else {
+            String title = getIntent().getStringExtra(LAND_TITLE);
+            fragment = new LandmarkFragment().newInstance(title);
+            item = 1;
 
-        String title = getIntent().getStringExtra(LAND_TITLE);
+        }
 
-        Fragment fragment = new LandmarkFragment().newInstance(title);
         if (fragment != null) {
             FragmentManager fragmentManager = getSupportFragmentManager();
             fragmentManager.beginTransaction()
                     .replace(R.id.flContent, fragment).commit();
-            navigationView.getMenu().getItem(1).setChecked(true);
-            setTitle(navigationView.getMenu().getItem(1).getTitle());
+            navigationView.getMenu().getItem(item).setChecked(true);
+            setTitle(navigationView.getMenu().getItem(item).getTitle());
             drawer.closeDrawer(GravityCompat.START);
         } else {
             // error in creating fragment

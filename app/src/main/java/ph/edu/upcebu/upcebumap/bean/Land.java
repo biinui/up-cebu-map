@@ -20,6 +20,7 @@ public class Land {
     private ArrayList<LatLng> latLngs;
 
     private List<Room> rooms = new ArrayList<>();
+
     public Land() {
         setCategory(new Category());
         setTitle("");

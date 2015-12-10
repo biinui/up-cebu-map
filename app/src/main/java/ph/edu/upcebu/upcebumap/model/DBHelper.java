@@ -19,6 +19,7 @@ import java.util.HashMap;
 import ph.edu.upcebu.upcebumap.bean.Building;
 import ph.edu.upcebu.upcebumap.bean.Category;
 import ph.edu.upcebu.upcebumap.bean.Land;
+import ph.edu.upcebu.upcebumap.bean.Office;
 import ph.edu.upcebu.upcebumap.bean.Shape;
 
 public class DBHelper extends SQLiteOpenHelper {
@@ -211,7 +212,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
     public Cursor getLandmarkWithTitle(String column) {
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor res = db.rawQuery("select * from " + LANDMARK_TABLE_NAME + " where " + LANDMARK_COLUMN_TITLE + " = '" + column + "' ", null);
+        Cursor res = db.rawQuery("select * from " + LANDMARK_TABLE_NAME + " where " + LANDMARK_COLUMN_TITLE + " = '" + column + "' order by ", null);
         return res;
     }
 
@@ -219,6 +220,24 @@ public class DBHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor res = db.rawQuery("select * from " + LANDMARK_TABLE_NAME + " where " + LANDMARK_COLUMN_TITLE + " like '%" + column + "%' ", null);
         return res;
+    }
+
+    public Office getOfficeData(int id, String buildname) {
+        Office office = new Office();
+        Cursor cur = getData(ROOM_TABLE_NAME, ROOM_COLUMN_ID, id);
+        cur.moveToFirst();
+        office.setId(cur.getInt(cur.getColumnIndex(ROOM_COLUMN_ID)));
+        office.setRoom(cur.getString(cur.getColumnIndex(ROOM_COLUMN_ROOM)));
+        office.setOffice(cur.getString(cur.getColumnIndex(ROOM_COLUMN_OFFICE)));
+        office.setHead(cur.getString(cur.getColumnIndex(ROOM_COLUMN_HEAD)));
+        office.setDescription(cur.getString(cur.getColumnIndex(ROOM_COLUMN_DESCRIPTION)));
+        office.setBuildID(cur.getInt(cur.getColumnIndex(ROOM_COLUMN_BUILDING)));
+        office.setPhone(cur.getString(cur.getColumnIndex(ROOM_COLUMN_PHONE)));
+        office.setBuildName(buildname);
+        office.setType(cur.getString(cur.getColumnIndex(ROOM_COLUMN_TYPE)));
+        cur.close();
+
+        return office;
     }
 
     public int numberOfRows(String tableName) {
@@ -301,14 +320,18 @@ public class DBHelper extends SQLiteOpenHelper {
     public Integer deleteLandmark(int id) {
         this.deleteItem(LANDMARK_TABLE_NAME, LANDMARK_COLUMN_ID, id);
         Cursor shapeID = this.getData(SHAPE_TABLE_NAME, SHAPE_COLUMN_LID, id);
-        this.deleteItem(SHAPE_COLUMN_ID, SHAPE_COLUMN_LID, id);
-        return this.deleteItem(BOUNDARY_TABLE_NAME, SHAPE_COLUMN_ID, shapeID.getInt(shapeID.getColumnIndex(SHAPE_COLUMN_ID)));
+        shapeID.moveToFirst();
+        this.deleteItem(SHAPE_TABLE_NAME, SHAPE_COLUMN_LID, id);
+        this.deleteItem(ROOM_TABLE_NAME, ROOM_COLUMN_BUILDING, id);
+        this.deleteItem(BOUNDARY_TABLE_NAME, SHAPE_COLUMN_ID, shapeID.getInt(shapeID.getColumnIndex(SHAPE_COLUMN_ID)));
+        shapeID.close();
+        return 1;
     }
 
     public ArrayList<Category> getAllCategory() {
         ArrayList<Category> array_list = new ArrayList<Category>();
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor res = db.rawQuery("select * from " + CATEGORY_TABLE_NAME, null);
+        Cursor res = db.rawQuery("select * from " + CATEGORY_TABLE_NAME + " order by " + CATEGORY_COLUMN_NAME, null);
         res.moveToFirst();
         Category category;
         while (res.isAfterLast() == false) {
@@ -325,7 +348,7 @@ public class DBHelper extends SQLiteOpenHelper {
         ArrayList<Land> array_list = new ArrayList<Land>();
         SQLiteDatabase db = this.getReadableDatabase();
 
-        Cursor landmarkCursor = db.rawQuery("select * from " + LANDMARK_TABLE_NAME, null);
+        Cursor landmarkCursor = db.rawQuery("select * from " + LANDMARK_TABLE_NAME + " order by " + LANDMARK_COLUMN_TITLE, null);
 //        db.close();
         landmarkCursor.moveToFirst();
         Land landmark;
@@ -385,12 +408,33 @@ public class DBHelper extends SQLiteOpenHelper {
     public ArrayList<Building> getAllBuilding() {
         ArrayList<Building> array_list = new ArrayList<Building>();
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor res = db.rawQuery("select * from " + LANDMARK_TABLE_NAME + " where " + LANDMARK_COLUMN_CATEGORY + " = 'Building'", null);
+        Cursor res = db.rawQuery("select * from " + LANDMARK_TABLE_NAME + " where " + LANDMARK_COLUMN_CATEGORY + " = 'Building' order by " + LANDMARK_COLUMN_TITLE, null);
         res.moveToFirst();
         Building building;
         while (res.isAfterLast() == false) {
             building = new Building(res.getInt(res.getColumnIndex(LANDMARK_COLUMN_ID)), res.getString(res.getColumnIndex(LANDMARK_COLUMN_TITLE)));
             array_list.add(building);
+            res.moveToNext();
+        }
+        db.close();
+
+        return array_list;
+    }
+
+    public ArrayList<Office> getAllOffice() {
+        ArrayList<Office> array_list = new ArrayList<Office>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        String str = "select * from " + LANDMARK_TABLE_NAME + " as l, " + ROOM_TABLE_NAME + " as r where " + LANDMARK_COLUMN_CATEGORY + " = 'Building' AND r." +
+                ROOM_COLUMN_BUILDING + " = l." + LANDMARK_COLUMN_ID + " ";
+        Cursor res = db.rawQuery(str, null);
+        res.moveToFirst();
+        Office office;
+        while (res.isAfterLast() == false) {
+            office = new Office(res.getInt(res.getColumnIndex(ROOM_COLUMN_ID)), res.getString(res.getColumnIndex(ROOM_COLUMN_ROOM)), res.getString(res.getColumnIndex(ROOM_COLUMN_OFFICE)),
+                    res.getString(res.getColumnIndex(ROOM_COLUMN_HEAD)), res.getString(res.getColumnIndex(ROOM_COLUMN_PHONE)),
+                    res.getString(res.getColumnIndex(ROOM_COLUMN_DESCRIPTION)), res.getInt(res.getColumnIndex(ROOM_COLUMN_BUILDING)),
+                    res.getString(res.getColumnIndex(LANDMARK_COLUMN_TITLE)), res.getString(res.getColumnIndex(ROOM_COLUMN_TYPE)));
+            array_list.add(office);
             res.moveToNext();
         }
         db.close();
@@ -412,6 +456,15 @@ public class DBHelper extends SQLiteOpenHelper {
         for (LatLng bound : landmark.getLatLngs()) {
             this.updateBoundary(landmark.getShape().getShapeID(), bound.latitude, bound.longitude, 0);
         }
+    }
+
+    public boolean updateItem(int id, String column, String value) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(column, value);
+        db.update(LANDMARK_TABLE_NAME, contentValues, LANDMARK_COLUMN_ID + " = ? ", new String[]{Integer.toString(id)});
+//        db.close();
+        return true;
     }
 
     /*

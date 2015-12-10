@@ -5,4 +5,5 @@
     <color name="colorAccent">#8F0A19</color>
     <color name="txtColor">#333333</color>
     <color name="txtColorSub">#666666</color>
+    <color name="roomBackground">#dadada</color>
 </resources>

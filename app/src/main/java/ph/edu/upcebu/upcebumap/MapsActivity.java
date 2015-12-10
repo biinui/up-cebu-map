@@ -173,7 +173,6 @@ public class MapsActivity extends FragmentActivity
         });
 
 
-
         mInflater = (LayoutInflater) getBaseContext().getSystemService(
                 LAYOUT_INFLATER_SERVICE);
 
@@ -220,7 +219,6 @@ public class MapsActivity extends FragmentActivity
                 });
         dialog = builder.create();
         //final AlertDialog dialog = builder.create();
-
 
 
     }

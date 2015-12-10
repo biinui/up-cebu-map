@@ -54,7 +54,10 @@
             android:label="Room"></activity>
         <activity
             android:name=".AddOfficeActivity"
-            android:label="Office">
+            android:label="Office"></activity>
+        <activity
+            android:name=".UpdateLandmarkActivity"
+            android:label="Landmark">
         </activity>
     </application>
 
