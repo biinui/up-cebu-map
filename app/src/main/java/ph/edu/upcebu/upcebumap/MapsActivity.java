@@ -321,9 +321,9 @@ public class MapsActivity extends FragmentActivity
     }
 
     private void showBuildingMarkers() {
-        for (Landmark lm : Landmark.Buildings()) {
-            showMarker(lm);
-        }
+//        for (Landmark lm : Landmark.Buildings()) {
+//            showMarker(lm);
+//        }
 
 
         List<Land> list = mDB.getAllLandmark();
@@ -341,9 +341,9 @@ public class MapsActivity extends FragmentActivity
     }
 
     private void showActivityAreaMarkers() {
-        for (Landmark lm : Landmark.ActivityAreas()) {
-            showMarker(lm);
-        }
+//        for (Landmark lm : Landmark.ActivityAreas()) {
+//            showMarker(lm);
+//        }
     }
 
     private void showTemporaryBoundary(List<LatLng> boundaries) {
@@ -542,8 +542,8 @@ public class MapsActivity extends FragmentActivity
             // Set all in landmark
             String t = nname.getText().toString();
             String category = selectedCategory.getCategoryName();
-            double lat = 0;
-            double lng = 0;
+            double lat = mTemporaryMarker.getPosition().latitude;
+            double lng = mTemporaryMarker.getPosition().longitude;
             String latitude = "";
             long lid = db.insertLandmark(t, category.trim(), lat, lng);
             long sid = db.insertShape(lid, "", "", "", 0);

@@ -27,8 +27,10 @@
             android:text="New Text"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
-        <!-- include list view of rooms here -->
-
+        <ExpandableListView
+            android:id="@+id/exp_list"
+            android:layout_width="match_parent"
+            android:layout_height="fill_parent"></ExpandableListView>
     </LinearLayout>
 
 </FrameLayout>

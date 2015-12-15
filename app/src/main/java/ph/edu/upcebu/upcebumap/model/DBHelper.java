@@ -212,7 +212,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
     public Cursor getLandmarkWithTitle(String column) {
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor res = db.rawQuery("select * from " + LANDMARK_TABLE_NAME + " where " + LANDMARK_COLUMN_TITLE + " = '" + column + "' order by ", null);
+        Cursor res = db.rawQuery("select * from " + LANDMARK_TABLE_NAME + " where " + LANDMARK_COLUMN_TITLE + " = '" + column + "'", null);
         return res;
     }
 
@@ -426,6 +426,27 @@ public class DBHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getReadableDatabase();
         String str = "select * from " + LANDMARK_TABLE_NAME + " as l, " + ROOM_TABLE_NAME + " as r where " + LANDMARK_COLUMN_CATEGORY + " = 'Building' AND r." +
                 ROOM_COLUMN_BUILDING + " = l." + LANDMARK_COLUMN_ID + " ";
+        Cursor res = db.rawQuery(str, null);
+        res.moveToFirst();
+        Office office;
+        while (res.isAfterLast() == false) {
+            office = new Office(res.getInt(res.getColumnIndex(ROOM_COLUMN_ID)), res.getString(res.getColumnIndex(ROOM_COLUMN_ROOM)), res.getString(res.getColumnIndex(ROOM_COLUMN_OFFICE)),
+                    res.getString(res.getColumnIndex(ROOM_COLUMN_HEAD)), res.getString(res.getColumnIndex(ROOM_COLUMN_PHONE)),
+                    res.getString(res.getColumnIndex(ROOM_COLUMN_DESCRIPTION)), res.getInt(res.getColumnIndex(ROOM_COLUMN_BUILDING)),
+                    res.getString(res.getColumnIndex(LANDMARK_COLUMN_TITLE)), res.getString(res.getColumnIndex(ROOM_COLUMN_TYPE)));
+            array_list.add(office);
+            res.moveToNext();
+        }
+        db.close();
+
+        return array_list;
+    }
+
+    public ArrayList<Office> getAllOfficeOfBuilding(long id) {
+        ArrayList<Office> array_list = new ArrayList<Office>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        String str = "select * from " + LANDMARK_TABLE_NAME + " as l, " + ROOM_TABLE_NAME + " as r where " + LANDMARK_COLUMN_CATEGORY + " = 'Building' AND r." +
+                ROOM_COLUMN_BUILDING + " = l." + LANDMARK_COLUMN_ID + " AND l." + LANDMARK_COLUMN_ID + " = '" + id + "'";
         Cursor res = db.rawQuery(str, null);
         res.moveToFirst();
         Office office;
